@@ -12,6 +12,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Warehouse,
   UserRound,
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ import { useUiStore } from "@/store/ui-store";
 export const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
   { to: "/inventory", label: "Inventory Network", icon: Boxes, group: "Overview" },
+  { to: "/warehouse-management", label: "Warehouse Management", icon: Warehouse, group: "Overview" },
   { to: "/recommendations", label: "AI Recommendations", icon: Sparkles, group: "Optimization", badge: "14" },
   { to: "/approvals", label: "Planner Approval", icon: ShieldCheck, group: "Optimization" },
   { to: "/agents", label: "Agent Monitor", icon: CircuitBoard, group: "Optimization" },

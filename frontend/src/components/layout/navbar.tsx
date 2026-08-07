@@ -121,16 +121,16 @@ export function Navbar() {
                 aria-label="Account menu"
               >
                 <span className="grid size-8 place-items-center rounded-full bg-gradient-primary text-xs font-semibold text-primary-foreground">
-                  {user.initials}
+                  {user?.initials ?? "NI"}
                 </span>
                 <span className="hidden text-left sm:block">
-                  <span className="block text-xs font-semibold leading-tight">{user.name}</span>
-                  <span className="block text-[10px] text-muted-foreground">{user.role}</span>
+                  <span className="block text-xs font-semibold leading-tight">{user?.name ?? "NetworkIQ"}</span>
+                  <span className="block text-[10px] text-muted-foreground">{user?.title ?? "Supply Planner"}</span>
                 </span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="text-xs text-muted-foreground">{user.email}</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">{user?.email ?? "admin@networkiq.com"}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/profile">

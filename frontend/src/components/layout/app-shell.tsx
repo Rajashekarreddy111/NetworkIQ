@@ -1,21 +1,39 @@
-import { useRouterState } from "@tanstack/react-router";
+import { Navigate, useRouterState } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, type ReactNode } from "react";
 
 import { Navbar } from "@/components/layout/navbar";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { WarehouseNavbar } from "@/components/warehouse/WarehouseNavbar";
+import { WarehouseSidebar } from "@/components/warehouse/WarehouseSidebar";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/app-store";
 import { useUiStore } from "@/store/ui-store";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const theme = useUiStore((s) => s.theme);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const authenticated = useAuthStore((s) => s.authenticated);
+  const role = useAuthStore((s) => s.user?.role);
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("light", theme === "light");
   }, [theme]);
+
+  if (!authenticated && pathname !== "/login") {
+    return <Navigate to="/login" />;
+  }
+
+  if (pathname === "/login") {
+    return <div className="min-h-screen bg-background">{children}</div>;
+  }
+
+  const warehouseMode = role === "warehouse" || pathname.startsWith("/warehouse");
+  const Sidebar = warehouseMode ? WarehouseSidebar : SidebarNav;
+  const Topbar = warehouseMode ? WarehouseNavbar : Navbar;
+  const sidebarWidth = collapsed ? "lg:pl-[76px]" : "lg:pl-[264px]";
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,11 +43,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           collapsed ? "w-[76px]" : "w-[264px]",
         )}
       >
-        <SidebarNav />
+        <Sidebar />
       </aside>
 
-      <div className={cn("transition-[padding] duration-300", collapsed ? "lg:pl-[76px]" : "lg:pl-[264px]")}>
-        <Navbar />
+      <div className={cn("transition-[padding] duration-300", sidebarWidth)}>
+        <Topbar />
         <motion.main
           key={pathname}
           initial={{ opacity: 0, y: 12 }}

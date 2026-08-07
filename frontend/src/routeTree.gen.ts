@@ -16,9 +16,18 @@ import { Route as ApprovalsRouteImport } from './routes/approvals'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as BenchmarkRouteImport } from './routes/benchmark'
 import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as WarehouseManagementRouteImport } from './routes/warehouse-management'
+import { Route as WarehouseIndexRouteImport } from './routes/warehouse/index'
+import { Route as WarehouseAddInventoryRouteImport } from './routes/warehouse/add-inventory'
+import { Route as WarehouseHistoryRouteImport } from './routes/warehouse/history'
+import { Route as WarehouseInventoryRouteImport } from './routes/warehouse/inventory'
+import { Route as WarehouseProfileRouteImport } from './routes/warehouse/profile'
+import { Route as WarehouseTransferRequestsRouteImport } from './routes/warehouse/transfer-requests'
+import { Route as WarehouseUploadRouteImport } from './routes/warehouse/upload'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -55,6 +64,11 @@ const InventoryRoute = InventoryRouteImport.update({
   path: '/inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -70,6 +84,47 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WarehouseManagementRoute = WarehouseManagementRouteImport.update({
+  id: '/warehouse-management',
+  path: '/warehouse-management',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarehouseIndexRoute = WarehouseIndexRouteImport.update({
+  id: '/warehouse/',
+  path: '/warehouse/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarehouseAddInventoryRoute = WarehouseAddInventoryRouteImport.update({
+  id: '/warehouse/add-inventory',
+  path: '/warehouse/add-inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarehouseHistoryRoute = WarehouseHistoryRouteImport.update({
+  id: '/warehouse/history',
+  path: '/warehouse/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarehouseInventoryRoute = WarehouseInventoryRouteImport.update({
+  id: '/warehouse/inventory',
+  path: '/warehouse/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarehouseProfileRoute = WarehouseProfileRouteImport.update({
+  id: '/warehouse/profile',
+  path: '/warehouse/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarehouseTransferRequestsRoute =
+  WarehouseTransferRequestsRouteImport.update({
+    id: '/warehouse/transfer-requests',
+    path: '/warehouse/transfer-requests',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WarehouseUploadRoute = WarehouseUploadRouteImport.update({
+  id: '/warehouse/upload',
+  path: '/warehouse/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -79,9 +134,18 @@ export interface FileRoutesByFullPath {
   '/audit': typeof AuditRoute
   '/benchmark': typeof BenchmarkRoute
   '/inventory': typeof InventoryRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/recommendations': typeof RecommendationsRoute
   '/settings': typeof SettingsRoute
+  '/warehouse-management': typeof WarehouseManagementRoute
+  '/warehouse/add-inventory': typeof WarehouseAddInventoryRoute
+  '/warehouse/history': typeof WarehouseHistoryRoute
+  '/warehouse/inventory': typeof WarehouseInventoryRoute
+  '/warehouse/profile': typeof WarehouseProfileRoute
+  '/warehouse/transfer-requests': typeof WarehouseTransferRequestsRoute
+  '/warehouse/upload': typeof WarehouseUploadRoute
+  '/warehouse/': typeof WarehouseIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,9 +155,18 @@ export interface FileRoutesByTo {
   '/audit': typeof AuditRoute
   '/benchmark': typeof BenchmarkRoute
   '/inventory': typeof InventoryRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/recommendations': typeof RecommendationsRoute
   '/settings': typeof SettingsRoute
+  '/warehouse-management': typeof WarehouseManagementRoute
+  '/warehouse/add-inventory': typeof WarehouseAddInventoryRoute
+  '/warehouse/history': typeof WarehouseHistoryRoute
+  '/warehouse/inventory': typeof WarehouseInventoryRoute
+  '/warehouse/profile': typeof WarehouseProfileRoute
+  '/warehouse/transfer-requests': typeof WarehouseTransferRequestsRoute
+  '/warehouse/upload': typeof WarehouseUploadRoute
+  '/warehouse': typeof WarehouseIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,9 +177,18 @@ export interface FileRoutesById {
   '/audit': typeof AuditRoute
   '/benchmark': typeof BenchmarkRoute
   '/inventory': typeof InventoryRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/recommendations': typeof RecommendationsRoute
   '/settings': typeof SettingsRoute
+  '/warehouse-management': typeof WarehouseManagementRoute
+  '/warehouse/add-inventory': typeof WarehouseAddInventoryRoute
+  '/warehouse/history': typeof WarehouseHistoryRoute
+  '/warehouse/inventory': typeof WarehouseInventoryRoute
+  '/warehouse/profile': typeof WarehouseProfileRoute
+  '/warehouse/transfer-requests': typeof WarehouseTransferRequestsRoute
+  '/warehouse/upload': typeof WarehouseUploadRoute
+  '/warehouse/': typeof WarehouseIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,9 +200,18 @@ export interface FileRouteTypes {
     | '/audit'
     | '/benchmark'
     | '/inventory'
+    | '/login'
     | '/profile'
     | '/recommendations'
     | '/settings'
+    | '/warehouse-management'
+    | '/warehouse/add-inventory'
+    | '/warehouse/history'
+    | '/warehouse/inventory'
+    | '/warehouse/profile'
+    | '/warehouse/transfer-requests'
+    | '/warehouse/upload'
+    | '/warehouse/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -130,9 +221,18 @@ export interface FileRouteTypes {
     | '/audit'
     | '/benchmark'
     | '/inventory'
+    | '/login'
     | '/profile'
     | '/recommendations'
     | '/settings'
+    | '/warehouse-management'
+    | '/warehouse/add-inventory'
+    | '/warehouse/history'
+    | '/warehouse/inventory'
+    | '/warehouse/profile'
+    | '/warehouse/transfer-requests'
+    | '/warehouse/upload'
+    | '/warehouse'
   id:
     | '__root__'
     | '/'
@@ -142,9 +242,18 @@ export interface FileRouteTypes {
     | '/audit'
     | '/benchmark'
     | '/inventory'
+    | '/login'
     | '/profile'
     | '/recommendations'
     | '/settings'
+    | '/warehouse-management'
+    | '/warehouse/add-inventory'
+    | '/warehouse/history'
+    | '/warehouse/inventory'
+    | '/warehouse/profile'
+    | '/warehouse/transfer-requests'
+    | '/warehouse/upload'
+    | '/warehouse/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,9 +264,18 @@ export interface RootRouteChildren {
   AuditRoute: typeof AuditRoute
   BenchmarkRoute: typeof BenchmarkRoute
   InventoryRoute: typeof InventoryRoute
+  LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   RecommendationsRoute: typeof RecommendationsRoute
   SettingsRoute: typeof SettingsRoute
+  WarehouseManagementRoute: typeof WarehouseManagementRoute
+  WarehouseAddInventoryRoute: typeof WarehouseAddInventoryRoute
+  WarehouseHistoryRoute: typeof WarehouseHistoryRoute
+  WarehouseInventoryRoute: typeof WarehouseInventoryRoute
+  WarehouseProfileRoute: typeof WarehouseProfileRoute
+  WarehouseTransferRequestsRoute: typeof WarehouseTransferRequestsRoute
+  WarehouseUploadRoute: typeof WarehouseUploadRoute
+  WarehouseIndexRoute: typeof WarehouseIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -211,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -232,6 +357,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/warehouse-management': {
+      id: '/warehouse-management'
+      path: '/warehouse-management'
+      fullPath: '/warehouse-management'
+      preLoaderRoute: typeof WarehouseManagementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouse/': {
+      id: '/warehouse/'
+      path: '/warehouse'
+      fullPath: '/warehouse/'
+      preLoaderRoute: typeof WarehouseIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouse/add-inventory': {
+      id: '/warehouse/add-inventory'
+      path: '/warehouse/add-inventory'
+      fullPath: '/warehouse/add-inventory'
+      preLoaderRoute: typeof WarehouseAddInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouse/history': {
+      id: '/warehouse/history'
+      path: '/warehouse/history'
+      fullPath: '/warehouse/history'
+      preLoaderRoute: typeof WarehouseHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouse/inventory': {
+      id: '/warehouse/inventory'
+      path: '/warehouse/inventory'
+      fullPath: '/warehouse/inventory'
+      preLoaderRoute: typeof WarehouseInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouse/profile': {
+      id: '/warehouse/profile'
+      path: '/warehouse/profile'
+      fullPath: '/warehouse/profile'
+      preLoaderRoute: typeof WarehouseProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouse/transfer-requests': {
+      id: '/warehouse/transfer-requests'
+      path: '/warehouse/transfer-requests'
+      fullPath: '/warehouse/transfer-requests'
+      preLoaderRoute: typeof WarehouseTransferRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warehouse/upload': {
+      id: '/warehouse/upload'
+      path: '/warehouse/upload'
+      fullPath: '/warehouse/upload'
+      preLoaderRoute: typeof WarehouseUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -243,9 +424,18 @@ const rootRouteChildren: RootRouteChildren = {
   AuditRoute: AuditRoute,
   BenchmarkRoute: BenchmarkRoute,
   InventoryRoute: InventoryRoute,
+  LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   RecommendationsRoute: RecommendationsRoute,
   SettingsRoute: SettingsRoute,
+  WarehouseManagementRoute: WarehouseManagementRoute,
+  WarehouseAddInventoryRoute: WarehouseAddInventoryRoute,
+  WarehouseHistoryRoute: WarehouseHistoryRoute,
+  WarehouseInventoryRoute: WarehouseInventoryRoute,
+  WarehouseProfileRoute: WarehouseProfileRoute,
+  WarehouseTransferRequestsRoute: WarehouseTransferRequestsRoute,
+  WarehouseUploadRoute: WarehouseUploadRoute,
+  WarehouseIndexRoute: WarehouseIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
