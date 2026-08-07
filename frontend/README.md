@@ -1,783 +1,230 @@
-# NetworkIQ Insights
-
-Think like a professional SaaS designer.
-
-Prioritize beautiful UI over generic dashboards.
-
-Use premium cards, spacing, typography, gradients, smooth animations and polished interactions.
-
-Every page should feel like a real enterprise AI product suitable for a real world project
-
-
-You are an expert Senior Frontend Engineer and UI/UX Designer with experience building enterprise SaaS dashboards for companies like Amazon, Walmart, Microsoft and Flipkart.
-
-Your task is to build a complete production-ready frontend for an AI-powered Supply Chain Inventory Optimization Platform called "NetworkIQ".
-
-The application should look like a premium enterprise product, not a college project.
-
-====================================================
-
-TECH STACK
-
-Use:
-
-• React 19
-
-• TypeScript
-
-• Vite
-
-• Tailwind CSS
-
-• shadcn/ui
-
-• React Router DOM
-
-• TanStack Query
-
-• Axios
-
-• Zustand
-
-• TanStack Table
-
-• Recharts
-
-• React Leaflet (for warehouse map)
-
-• Framer Motion
-
-• Lucide React Icons
-
-• Sonner Toast
-
-Use reusable components.
-
-Use responsive layouts.
-
-Support Desktop, Tablet and Mobile.
-
-Follow modern design principles.
-
-====================================================
-
-DESIGN STYLE
-
-The design should resemble
-
-Microsoft Azure Portal
-
-AWS Console
-
-Power BI
-
-Oracle Supply Chain
-
-SAP Analytics Cloud
-
-The design should feel
-
-• Premium
-
-• Modern
-
-• Minimal
-
-• Enterprise
-
-• Clean
-
-• Spacious
-
-Color Palette
-
-Primary
-
-#2563EB
-
-Success
-
-#16A34A
-
-Danger
-
-#DC2626
-
-Warning
-
-#F59E0B
-
-Background
-
-#0F172A
-
-Card
-
-#1E293B
-
-Text
-
-#F8FAFC
-
-Border Radius
-
-large rounded cards
-
-Soft shadows
-
-Glassmorphism where appropriate
-
-Dark mode by default.
-
-====================================================
-
-APPLICATION NAME
-
-NetworkIQ
-
-Subtitle
-
-AI Powered Inventory Optimization Platform
-
-====================================================
-
-SIDEBAR
-
-Permanent sidebar on desktop.
-
-Collapsible.
-
-Contains icons.
-
-Menu
-
-Dashboard
-
-Inventory Network
-
-AI Recommendations
-
-Planner Approval
-
-Agent Monitor
-
-Benchmark
-
-Analytics
-
-Audit Trail
-
-Settings
-
-Profile
-
-====================================================
-
-TOP NAVBAR
-
-Company Logo
-
-Global Search
-
-Notifications
-
-Theme Toggle
-
-User Avatar
-
-====================================================
-
-PAGE 1
-
-DASHBOARD
-
-Hero
-
-Welcome
-
-Today's AI Insights
-
-Cards
-
-Total Warehouses
-
-Total Stores
-
-Active SKUs
-
-Inventory Value
-
-Holding Cost
-
-Transfer Cost
-
-Estimated Savings
-
-AI Confidence
-
-Pending Transfers
-
-Rejected Transfers
-
-Warehouse Utilization
-
-Stockout Risk
-
-Charts
-
-Demand Forecast
-
-Transfer Trend
-
-Warehouse Utilization
-
-Inventory Distribution
-
-Fast vs Slow Movers
-
-Recent AI Activities timeline
-
-====================================================
-
-PAGE 2
-
-INVENTORY NETWORK
-
-Filters
-
-Region
-
-Warehouse
-
-Category
-
-Velocity Class
-
-Risk Level
-
-Search SKU
-
-Inventory Table
-
-Columns
-
-SKU
-
-Product
-
-Warehouse
-
-Current Stock
-
-Predicted Demand
-
-Days Cover
-
-Velocity
-
-Capacity
-
-Risk
-
-Status
-
-Expandable drawer
-
-Show
-
-Historical demand
-
-Trend
-
-Forecast
-
-Inventory health
-
-Warehouse utilization
-
-Right side
-
-Interactive India Map
-
-Warehouse markers
-
-Transfer routes
-
-Demand heatmap
-
-====================================================
-
-PAGE 3
-
-AI RECOMMENDATIONS
-
-This is the most important page.
-
-Top Summary Cards
-
-Recommendations
-
-Expected Savings
-
-Pending Approval
-
-Average Confidence
-
-Large Enterprise Table
-
-Columns
-
-SKU
-
-Source Warehouse
-
-Destination Warehouse
-
-Quantity
-
-Transfer Cost
-
-Margin Unlocked
-
-Demand Basis
-
-Cost Tradeoff
-
-Cost Per Unit
-
-Status
-
-Confidence
-
-Each row has
-
-View Details
-
-Approve
-
-Reject
-
-Override
-
-Expandable Details
-
-Forecast Graph
-
-Reasoning
-
-Business Impact
-
-Agent Explanation
-
-Confidence Score
-
-Expected Profit
-
-Risk Analysis
-
-====================================================
-
-PAGE 4
-
-PLANNER APPROVAL CENTER
-
-Tabs
-
-Pending
-
-Approved
-
-Rejected
-
-Cards
-
-Transfer Summary
-
-Business Value
-
-Transfer Cost
-
-Margin
-
-Risk
-
-Buttons
-
-Approve
-
-Reject
-
-Override
-
-Modal
-
-Transfer Details
-
-Demand Analysis
-
-Inventory Analysis
-
-Cost Breakdown
-
-Planner Notes
-
-====================================================
-
-PAGE 5
-
-AGENT MONITOR
-
-This page should impress judges.
-
-Show six AI agents.
-
-Demand Forecast Agent
-
-Inventory Agent
-
-Capacity Agent
-
-Transfer Agent
-
-Coordinator Agent
-
-Guardrail Agent
-
-Each card contains
-
-Status
-
-Latency
-
-Confidence
-
-Current Task
-
-Animated connection lines between agents.
-
-Show workflow animation
-
-Demand
-
-↓
-
-Inventory
-
-↓
-
-Coordinator
-
-↓
-
-Optimization
-
-↓
-
-Guardrail
-
-↓
-
-Planner
-
-Live activity feed
-
-====================================================
-
-PAGE 6
-
-BENCHMARK
-
-Compare
-
-Classical Solver
-
-vs
-
-AI Plan
-
-Metric Cards
-
-Holding Cost
-
-Transfer Cost
-
-Stock Availability
-
-Catalog Coverage
-
-Savings
-
-Bar Charts
-
-Radar Chart
-
-Improvement %
-
-====================================================
-
-PAGE 7
-
-ANALYTICS
-
-Charts
-
-Demand Forecast
-
-Warehouse Performance
-
-Transfer Frequency
-
-Category Performance
-
-Inventory Health
-
-Top SKUs
-
-Top Warehouses
-
-Heatmaps
-
-====================================================
-
-PAGE 8
-
-AUDIT TRAIL
-
-Timeline
-
-Every AI recommendation
-
-Planner decision
-
-Execution
-
-Completion
-
-Audit Table
-
-Timestamp
-
-SKU
-
-Transfer
-
-Planner
-
-Decision
-
-Reason
-
-Status
-
-====================================================
-
-PAGE 9
-
-SETTINGS
-
-API Configuration
-
-Theme
-
-Notifications
-
-Planner Threshold
-
-Warehouse Configuration
-
-====================================================
-
-PAGE 10
-
-PROFILE
-
-User
-
-Role
-
-Department
-
-Recent Activity
-
-Logout
-
-====================================================
-
-COMPONENTS
-
-Create reusable components.
-
-Sidebar
-
-Navbar
-
-SummaryCard
-
-ChartCard
-
-TransferTable
-
-InventoryTable
-
-AgentCard
-
-WarehouseCard
-
-BenchmarkCard
-
-AnalyticsChart
-
-AuditTimeline
-
-ApprovalModal
-
-StatusBadge
-
-NotificationPanel
-
-SearchBar
-
-Filters
-
-MapComponent
-
-LoadingSkeleton
-
-ErrorState
-
-EmptyState
-
-====================================================
-
-CHARTS
-
-Use Recharts.
-
-Bar Charts
-
-Line Charts
-
-Pie Charts
-
-Area Charts
-
-Radar Charts
-
-Heatmaps
-
-====================================================
-
-ANIMATIONS
-
-Use Framer Motion.
-
-Page transitions
-
-Card hover
-
-Button animation
-
-Sidebar animation
-
-Agent animation
-
-Loading animation
-
-====================================================
-
-STATE MANAGEMENT
-
-Use Zustand.
-
-Theme
-
-Authentication
-
-Dashboard Data
-
-Planner State
-
-Inventory
-
-====================================================
-
-API LAYER
-
-Create an Axios service.
-
-Prepare hooks for
-
-/dashboard
-
-/inventory
-
-/plan
-
-/self-check
-
-/benchmark
-
-/config
-
-Use mocked JSON initially.
-
-====================================================
-
-RESPONSIVENESS
-
-Fully responsive.
-
-Desktop
-
-Laptop
-
-Tablet
-
-Mobile
-
-No layout breaking.
-
-====================================================
-
-ACCESSIBILITY
-
-Keyboard navigation.
-
-ARIA labels.
-
-Proper contrast.
-
-====================================================
-
-CODE QUALITY
-
-Use TypeScript interfaces.
-
-Modular architecture.
-
-Reusable components.
-
-No duplicated code.
-
-Clean folder structure.
-
-====================================================
-
-OUTPUT
-
-Generate the complete frontend with all pages, routing, reusable components, mocked data, responsive layouts, enterprise-quality UI, animations, and proper project structure.
-
-Do not generate placeholder boxes only.
-
-Generate realistic charts, realistic inventory data, realistic transfer tables, realistic AI recommendations, realistic warehouse information and professional enterprise dashboards.
-
-## Development
-
-You need Node.js and npm.
+# NetworkIQ Frontend
+
+NetworkIQ is an AI-powered supply chain inventory optimization console for planners, operations teams, and supply chain analysts. The frontend provides a premium enterprise dashboard for inventory visibility, AI transfer recommendations, planner approvals, agent monitoring, benchmarking, analytics, audit review, and configuration.
+
+The app is built as a TanStack Start React application with mocked data by default, and it can be connected to a live NetworkIQ backend through an environment variable.
+
+## Features
+
+- Command dashboard with KPIs, AI insight cards, demand charts, transfer trends, and recent activity.
+- Inventory Network page with SKU filters, inventory health indicators, warehouse context, and route visualization.
+- AI Recommendations page with transfer plans, confidence scores, cost tradeoffs, business impact, and planner actions.
+- Planner Approval Center for approving, rejecting, or overriding recommended transfers.
+- Agent Monitor for the demand, inventory, capacity, transfer, coordinator, and guardrail agents.
+- Benchmark view comparing classical solver output against the NetworkIQ AI plan.
+- Analytics workspace for demand, warehouse, category, SKU, and inventory performance.
+- Audit Trail for recommendation, decision, execution, and completion events.
+- Settings and Profile pages for planner preferences, API settings, notifications, and account context.
+- Responsive shell with desktop sidebar, mobile navigation, global search, notifications, theme controls, and toast feedback.
+
+## Tech Stack
+
+- React 19
+- TypeScript
+- Vite 8
+- TanStack Start
+- TanStack Router
+- TanStack Query
+- TanStack Table
+- Tailwind CSS 4
+- Radix UI primitives
+- shadcn-style UI components
+- Zustand
+- Axios
+- Recharts
+- Motion
+- Lucide React
+- Sonner
+
+## Requirements
+
+- Node.js 20 or newer recommended
+- npm 10 or newer recommended
+
+## Getting Started
+
+Install dependencies from the frontend directory:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+npm install
+```
+
+Start the development server:
+
+```sh
 npm run dev
+```
+
+The app usually runs at:
+
+```txt
+http://localhost:5173/
+```
+
+If that port is already in use, Vite will print the available local URL in the terminal.
+
+## Available Scripts
+
+```sh
+npm run dev
+```
+
+Starts the Vite development server.
+
+```sh
+npm run build
+```
+
+Creates a production build for the TanStack Start app.
+
+```sh
+npm run build:dev
+```
+
+Creates a development-mode build.
+
+```sh
+npm run preview
+```
+
+Serves the production build locally for verification.
+
+```sh
+npm run lint
+```
+
+Runs ESLint across the frontend source.
+
+```sh
+npm run format
+```
+
+Formats files with Prettier.
+
+## Environment Configuration
+
+The app uses mock data unless `VITE_NETWORKIQ_API_URL` is set.
+
+Create a local `.env` file in the `frontend` directory when connecting to a backend:
+
+```env
+VITE_NETWORKIQ_API_URL=http://localhost:8000
+```
+
+When this variable is not set, API hooks read from `src/lib/mock-data.ts` through the mock resource map in `src/lib/api.ts`.
+
+## API Resources
+
+The frontend is prepared for these backend paths:
+
+- `GET /dashboard`
+- `GET /inventory`
+- `GET /plan`
+- `POST /plan/decision`
+- `GET /self-check`
+- `GET /benchmark`
+- `GET /analytics`
+- `GET /audit`
+- `GET /config`
+
+The shared Axios client lives in `src/lib/api.ts`. React Query hooks for these resources live in `src/hooks/use-networkiq.ts`.
+
+## Project Structure
+
+```txt
+frontend/
+  public/
+    favicon.ico
+    favicon.svg
+    robots.txt
+  src/
+    components/
+      common/        Shared dashboard components
+      layout/        App shell, navbar, sidebar
+      ui/            Reusable UI primitives
+    hooks/           Data and viewport hooks
+    lib/             API client, mock data, formatters, utilities
+    routes/          File-based application routes
+    store/           Zustand stores
+    router.tsx       TanStack Router factory
+    routeTree.gen.ts Generated route tree
+    server.ts        SSR server wrapper
+    start.ts         TanStack Start setup
+    styles.css       Global theme and Tailwind styles
+  package.json
+  vite.config.ts
+```
+
+## Routes
+
+- `/` - Command Dashboard
+- `/inventory` - Inventory Network
+- `/recommendations` - AI Recommendations
+- `/approvals` - Planner Approval Center
+- `/agents` - Agent Monitor
+- `/benchmark` - Solver Benchmark
+- `/analytics` - Analytics
+- `/audit` - Audit Trail
+- `/settings` - Settings
+- `/profile` - Profile
+
+## Styling And Design System
+
+The UI uses a dark-first enterprise console style with:
+
+- NetworkIQ brand metadata and favicon assets.
+- Tailwind CSS tokens in `src/styles.css`.
+- Reusable Radix-based UI components in `src/components/ui`.
+- Shared dashboard primitives such as `SummaryCard`, `ChartCard`, `StatusBadge`, filters, states, and map components.
+- Responsive layouts for desktop, tablet, and mobile.
+
+## Data Flow
+
+1. Pages call hooks from `src/hooks/use-networkiq.ts`.
+2. Hooks use TanStack Query for caching, stale times, refetching, and mutations.
+3. `fetchResource` and `postResource` in `src/lib/api.ts` decide between mock mode and live API mode.
+4. Mock mode returns realistic domain data from `src/lib/mock-data.ts`.
+5. Live mode sends requests through the shared Axios client.
+
+## Build Output
+
+Production builds are written to:
+
+```txt
+dist/
+  client/
+  server/
+```
+
+Use `npm run preview` after `npm run build` to inspect the production output locally.
+
+## Development Notes
+
+- `src/routeTree.gen.ts` is generated by TanStack Router. Do not edit it manually.
+- Keep reusable visual primitives in `src/components/common` or `src/components/ui`.
+- Keep page-level workflows in `src/routes`.
+- Keep API request and response handling centralized in `src/lib/api.ts` and `src/hooks/use-networkiq.ts`.
+- Prefer adding typed domain data to `src/lib/mock-data.ts` while backend endpoints are still being finalized.
+
+## Troubleshooting
+
+If dependencies are out of sync:
+
+```sh
+npm install
+```
+
+If a route does not appear after creating a new route file, restart the dev server so the generated route tree refreshes.
+
+If the app still uses mock data after setting a backend URL, confirm the variable name starts with `VITE_`:
+
+```env
+VITE_NETWORKIQ_API_URL=http://localhost:8000
+```
+
+If production behavior differs from development:
+
+```sh
+npm run build
+npm run preview
 ```
