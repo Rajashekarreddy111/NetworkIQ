@@ -1,0 +1,17 @@
+sku,location,current_stock,avg_daily_demand,velocity_class,unit_margin,perishable,location_capacity_remaining
+SKU1001,South_Store,150,15.0,A,52.0,false,300
+SKU1002,South_Store,10,25.0,A,45.0,true,300
+SKU1003,South_Store,80,8.0,B,30.0,false,300
+SKU1004,South_Store,40,4.0,C,15.0,false,300
+SKU1001,North_Store,15,30.0,A,52.0,false,250
+SKU1002,North_Store,180,12.0,A,45.0,true,250
+SKU1003,North_Store,120,6.0,B,30.0,false,250
+SKU1005,North_Store,25,18.0,A,60.0,false,250
+SKU1003,East_Store,200,10.0,B,30.0,false,400
+SKU1004,East_Store,110,5.0,C,15.0,false,400
+SKU1005,East_Store,15,22.0,A,60.0,false,400
+SKU1003,West_Store,5,18.0,B,30.0,false,150
+SKU1004,West_Store,95,3.0,C,15.0,false,150
+SKU1005,West_Store,140,8.0,A,60.0,false,150
+SKU1001,Central_Store,90,14.0,A,52.0,false,500
+SKU1004,Central_Store,130,2.0,C,15.0,false,500

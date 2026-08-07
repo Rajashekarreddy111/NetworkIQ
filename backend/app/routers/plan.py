@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.models.response import SelfCheckResult, ValidatedTransfer
 from app.routers import ApiError
+from app.services.audit_service import AuditService, get_audit_service
 from app.services.plan_repository import PlanRepository, get_plan_repository
 from app.utils.logger import get_logger
 
@@ -24,6 +25,15 @@ class SelfCheckAgentProtocol(Protocol):
 class SelfCheckPendingResponse(BaseModel):
     status: str
     message: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class PlannerDecisionPayload(BaseModel):
+    id: str
+    decision: str
+    note: str | None = None
+    quantity: int | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -80,6 +90,31 @@ def self_check_plan(
         ) from exc
 
 
+@selfcheck_router.get(
+    "/self-check",
+    response_model=SelfCheckResult | SelfCheckPendingResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get latest self-check agent status and evaluation",
+)
+@router.get(
+    "/plan/self-check",
+    response_model=SelfCheckResult | SelfCheckPendingResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get latest self-check agent status and evaluation for plan",
+)
+def get_self_check(
+    plan_repository: Annotated[PlanRepository, Depends(get_plan_repository)],
+    self_check_agent: Annotated[SelfCheckAgentProtocol | None, Depends(get_self_check_agent)],
+) -> SelfCheckResult | SelfCheckPendingResponse:
+    latest_plan = plan_repository.get_latest_plan()
+    if self_check_agent is None or not latest_plan:
+        return SelfCheckPendingResponse(
+            status="pending",
+            message="No self-check result available.",
+        )
+    return self_check_agent.review_plan(latest_plan)
+
+
 @router.get(
     "/plan",
     response_model=list[ValidatedTransfer],
@@ -102,9 +137,12 @@ def get_latest_plan(
 def approve_transfer(
     id: Annotated[str, Path(description="Stable transfer identifier in the latest validated plan.")],
     plan_repository: Annotated[PlanRepository, Depends(get_plan_repository)],
+    audit_service: Annotated[AuditService, Depends(get_audit_service)],
 ) -> ValidatedTransfer:
     logger.info("Approving validated transfer id %s.", id)
-    return plan_repository.approve(id)
+    approved = plan_repository.approve(id)
+    audit_service.record("APPROVE", approved.sku, approved.from_location, f"Transfer approved for qty {approved.qty}")
+    return approved
 
 
 @router.post(
@@ -117,6 +155,37 @@ def override_transfer(
     id: Annotated[str, Path(description="Stable transfer identifier in the latest validated plan.")],
     transfer: Annotated[ValidatedTransfer, Body()],
     plan_repository: Annotated[PlanRepository, Depends(get_plan_repository)],
+    audit_service: Annotated[AuditService, Depends(get_audit_service)],
 ) -> ValidatedTransfer:
     logger.info("Overriding validated transfer id %s.", id)
-    return plan_repository.override(id, transfer)
+    overridden = plan_repository.override(id, transfer)
+    audit_service.record("OVERRIDE", overridden.sku, overridden.from_location, f"Transfer overridden for qty {overridden.qty}")
+    return overridden
+
+
+@router.post(
+    "/plan/decision",
+    response_model=PlannerDecisionPayload,
+    status_code=status.HTTP_200_OK,
+    summary="Submit planner decision (Approve, Reject, Override) for a transfer recommendation",
+)
+def submit_planner_decision(
+    payload: Annotated[PlannerDecisionPayload, Body()],
+    plan_repository: Annotated[PlanRepository, Depends(get_plan_repository)],
+    audit_service: Annotated[AuditService, Depends(get_audit_service)],
+) -> PlannerDecisionPayload:
+    logger.info("Processing planner decision %s for transfer id %s.", payload.decision, payload.id)
+    decision_type = payload.decision.lower()
+
+    if decision_type == "approve":
+        transfer = plan_repository.approve(payload.id)
+        audit_service.record("APPROVE", transfer.sku, transfer.from_location, payload.note or "Approved by planner")
+    else:
+        audit_service.record(
+            decision_type.upper(),
+            "TRANSFER",
+            "PLANNER",
+            payload.note or f"Planner decision {payload.decision} recorded for transfer {payload.id}",
+        )
+
+    return payload

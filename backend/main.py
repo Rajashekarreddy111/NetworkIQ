@@ -8,12 +8,16 @@ from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.routers import ApiError
+from app.routers.analytics import router as analytics_router
+from app.routers.audit import router as audit_router
 from app.routers.benchmark import router as benchmark_router
 from app.routers.config import router as config_router
 from app.routers.coordinator import agents_router as coordinator_router
 from app.routers.coordinator import cost_router
+from app.routers.dashboard import router as dashboard_router
 from app.routers.guardrails import router as guardrails_router
 from app.routers.health import router as health_router
+from app.routers.inventory import router as inventory_router
 from app.routers.plan import router as plan_router
 from app.routers.plan import selfcheck_router
 from app.routers.regional import router as regional_router
@@ -70,8 +74,12 @@ def api_error_handler(request: Request, exc: ApiError) -> JSONResponse:
     )
 
 
-# Register existing application routers
+# Register application routers
 app.include_router(health_router)
+app.include_router(dashboard_router)
+app.include_router(inventory_router)
+app.include_router(analytics_router)
+app.include_router(audit_router)
 app.include_router(regional_router)
 app.include_router(coordinator_router)
 app.include_router(cost_router)

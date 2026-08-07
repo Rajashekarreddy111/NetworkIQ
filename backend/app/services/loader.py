@@ -21,9 +21,22 @@ class InventoryLoaderError(Exception):
 class InventoryLoader:
     """Loads processed inventory files and groups validated rows by store."""
 
-    def load(self, file_path: str | Path) -> dict[str, list[InventoryPosition]]:
+    def resolve_default_path(self) -> Path:
+        """Find default inventory file in backend directory or fixtures."""
+        backend_root = Path(__file__).resolve().parents[2]
+        candidates = [
+            backend_root / "master_inventory.csv",
+            backend_root / "inventory.csv",
+            backend_root / "app" / "fixtures" / "inventory_positions.json",
+        ]
+        for candidate in candidates:
+            if candidate.exists() and candidate.is_file():
+                return candidate
+        return candidates[0]
+
+    def load(self, file_path: str | Path | None = None) -> dict[str, list[InventoryPosition]]:
         """Load a CSV or JSON inventory file, validate each row, and group records by location."""
-        path = Path(file_path)
+        path = Path(file_path) if file_path else self.resolve_default_path()
         if not path.exists():
             logger.error("Inventory file not found: %s", path)
             raise InventoryLoaderError(f"Inventory file not found: {path}")
@@ -45,6 +58,14 @@ class InventoryLoader:
         grouped_inventory = self._validate_and_group(rows)
         logger.info("Loaded inventory for %s store(s) from %s.", len(grouped_inventory), path)
         return grouped_inventory
+
+    def load_flat(self, file_path: str | Path | None = None) -> list[InventoryPosition]:
+        """Load inventory as a flat list of InventoryPosition objects."""
+        grouped = self.load(file_path)
+        flat_list: list[InventoryPosition] = []
+        for positions in grouped.values():
+            flat_list.extend(positions)
+        return flat_list
 
     def _load_csv_rows(self, file_path: Path) -> list[dict[str, Any]]:
         """Read CSV inventory data and return each row as a dictionary for model validation."""
