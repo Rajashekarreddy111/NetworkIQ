@@ -80,9 +80,42 @@ class CoordinatorAgent:
                         f"Regional output location '{item.location}' does not match dictionary key '{store}'."
                     )
 
+    def match_candidates(self, regional_outputs: dict[str, list[SurplusDeficit]]) -> list[dict[str, Any]]:
+        """Pure Python candidate matching (Step 3.2): pair surplus & deficit SKUs across stores."""
+        surplus_by_sku: dict[str, list[SurplusDeficit]] = {}
+        deficit_by_sku: dict[str, list[SurplusDeficit]] = {}
+
+        for store, items in regional_outputs.items():
+            for item in items:
+                if item.status == "surplus" and item.qty > 0:
+                    surplus_by_sku.setdefault(item.sku, []).append(item)
+                elif item.status == "deficit" and item.qty > 0:
+                    deficit_by_sku.setdefault(item.sku, []).append(item)
+
+        candidate_pairs: list[dict[str, Any]] = []
+        for sku, surplus_list in surplus_by_sku.items():
+            if sku in deficit_by_sku:
+                for surplus in surplus_list:
+                    for deficit in deficit_by_sku[sku]:
+                        if surplus.location != deficit.location:
+                            candidate_pairs.append({
+                                "sku": sku,
+                                "from_location": surplus.location,
+                                "to_location": deficit.location,
+                                "surplus_qty": surplus.qty,
+                                "deficit_qty": deficit.qty,
+                                "max_transferrable": min(surplus.qty, deficit.qty),
+                                "surplus_confidence": surplus.confidence,
+                                "deficit_confidence": deficit.confidence,
+                            })
+
+        logger.info("Pure Python candidate matching found %s candidate pair(s).", len(candidate_pairs))
+        return candidate_pairs
+
     def _build_prompt(self, regional_outputs: dict[str, list[SurplusDeficit]]) -> str:
-        """Load the coordinator prompt template and inject the regional outputs JSON."""
+        """Load the coordinator prompt template and inject regional outputs & candidate matches JSON."""
         template = self._load_prompt_template()
+        candidates = self.match_candidates(regional_outputs)
         serialized_outputs = json.dumps(
             {
                 store: [item.model_dump(mode="json") for item in items]
@@ -90,7 +123,15 @@ class CoordinatorAgent:
             },
             indent=2,
         )
-        return template.format(regional_outputs_json=serialized_outputs)
+        serialized_candidates = json.dumps(candidates, indent=2)
+
+        try:
+            return template.format(
+                regional_outputs_json=serialized_outputs,
+                candidate_pairs_json=serialized_candidates,
+            )
+        except KeyError:
+            return template.format(regional_outputs_json=serialized_outputs)
 
     def _load_prompt_template(self) -> str:
         """Load the coordinator prompt file and fail fast if it is missing or empty."""

@@ -46,12 +46,12 @@ def _configure_logging() -> None:
     file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
 
-    root_logger = logging.getLogger("app")
-    root_logger.setLevel(log_level)
-    root_logger.propagate = False
+    # Attach to root 'app' logger and enable propagation for sub-modules
+    app_logger = logging.getLogger("app")
+    app_logger.setLevel(log_level)
 
-    if not root_logger.handlers:
-        root_logger.addHandler(console_handler)
-        root_logger.addHandler(file_handler)
+    if not app_logger.handlers:
+        app_logger.addHandler(console_handler)
+        app_logger.addHandler(file_handler)
 
     _LOGGER_CONFIGURED = True

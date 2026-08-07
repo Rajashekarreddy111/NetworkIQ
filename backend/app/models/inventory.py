@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class InventoryPosition(BaseModel):
@@ -52,8 +52,14 @@ class InventoryPosition(BaseModel):
     location_capacity_remaining: int = Field(
         ...,
         ge=0,
+        validation_alias=AliasChoices("location_capacity_remaining", "capacity_remaining"),
         description="Remaining storage capacity"
     )
+
+    @property
+    def capacity_remaining(self) -> int:
+        """Alias property for location_capacity_remaining."""
+        return self.location_capacity_remaining
 
     model_config = {
         "extra": "forbid",

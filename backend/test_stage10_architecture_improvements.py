@@ -51,16 +51,22 @@ class Stage10ArchitectureImprovementsTestCase(unittest.TestCase):
         self.assertEqual(id_response.json()["status"], "approved")
 
     def test_selfcheck_returns_pending_response_when_agent_is_disabled(self) -> None:
-        response = self.client.post("/selfcheck", json=[build_validated_transfer().model_dump()])
+        from app.routers.plan import get_self_check_agent
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.json(),
-            {
-                "status": "pending",
-                "message": "Self Check Agent is currently disabled.",
-            },
-        )
+        app.dependency_overrides[get_self_check_agent] = lambda: None
+        try:
+            response = self.client.post("/selfcheck", json=[build_validated_transfer().model_dump()])
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(
+                response.json(),
+                {
+                    "status": "pending",
+                    "message": "Self Check Agent is currently disabled.",
+                },
+            )
+        finally:
+            app.dependency_overrides.pop(get_self_check_agent, None)
 
 
 if __name__ == "__main__":
