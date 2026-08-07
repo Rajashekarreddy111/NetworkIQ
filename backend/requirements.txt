@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+
+pandas
+numpy
+
+httpx
+
+anthropic
+
+openai
+
+orjson
+
+python-multipart
