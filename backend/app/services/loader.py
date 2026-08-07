@@ -8,6 +8,10 @@ from typing import Any
 from pydantic import ValidationError
 
 from app.models.inventory import InventoryPosition
+from app.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class InventoryLoaderError(Exception):
@@ -21,8 +25,10 @@ class InventoryLoader:
         """Load a CSV or JSON inventory file, validate each row, and group records by location."""
         path = Path(file_path)
         if not path.exists():
+            logger.error("Inventory file not found: %s", path)
             raise InventoryLoaderError(f"Inventory file not found: {path}")
         if not path.is_file():
+            logger.error("Inventory path is not a file: %s", path)
             raise InventoryLoaderError(f"Inventory path is not a file: {path}")
 
         suffix = path.suffix.lower()
@@ -31,11 +37,14 @@ class InventoryLoader:
         elif suffix == ".json":
             rows = self._load_json_rows(path)
         else:
+            logger.error("Unsupported inventory file format: %s", path.suffix)
             raise InventoryLoaderError(
                 f"Unsupported inventory file format: {path.suffix}. Supported formats are .csv and .json."
             )
 
-        return self._validate_and_group(rows)
+        grouped_inventory = self._validate_and_group(rows)
+        logger.info("Loaded inventory for %s store(s) from %s.", len(grouped_inventory), path)
+        return grouped_inventory
 
     def _load_csv_rows(self, file_path: Path) -> list[dict[str, Any]]:
         """Read CSV inventory data and return each row as a dictionary for model validation."""
@@ -43,8 +52,10 @@ class InventoryLoader:
             with file_path.open(mode="r", encoding="utf-8-sig", newline="") as csv_file:
                 return list(csv.DictReader(csv_file))
         except csv.Error as exc:
+            logger.exception("Invalid CSV file: %s", file_path)
             raise InventoryLoaderError(f"Invalid CSV file: {file_path}") from exc
         except OSError as exc:
+            logger.exception("Unable to read CSV file: %s", file_path)
             raise InventoryLoaderError(f"Unable to read CSV file: {file_path}") from exc
 
     def _load_json_rows(self, file_path: Path) -> list[dict[str, Any]]:
@@ -53,8 +64,10 @@ class InventoryLoader:
             with file_path.open(mode="r", encoding="utf-8") as json_file:
                 payload = json.load(json_file)
         except json.JSONDecodeError as exc:
+            logger.exception("Invalid JSON file: %s", file_path)
             raise InventoryLoaderError(f"Invalid JSON file: {file_path}") from exc
         except OSError as exc:
+            logger.exception("Unable to read JSON file: %s", file_path)
             raise InventoryLoaderError(f"Unable to read JSON file: {file_path}") from exc
 
         if not isinstance(payload, list):
@@ -74,6 +87,7 @@ class InventoryLoader:
             try:
                 inventory_position = InventoryPosition.model_validate(row)
             except ValidationError as exc:
+                logger.error("Invalid inventory row at position %s.", index)
                 raise InventoryLoaderError(f"Invalid inventory row at position {index}: {exc}") from exc
 
             grouped_inventory.setdefault(inventory_position.location, []).append(inventory_position)

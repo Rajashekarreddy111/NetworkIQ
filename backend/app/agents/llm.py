@@ -9,6 +9,12 @@ from typing import Any
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors, types
+from pydantic import BaseModel, TypeAdapter, ValidationError
+
+from app.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class GeminiLLM:
@@ -53,6 +59,7 @@ class GeminiLLM:
                 retry_options=types.HttpRetryOptions(attempts=1),
             ),
         )
+        logger.debug("GeminiLLM initialized with default model '%s'.", self._default_model)
 
     def generate(
         self,
@@ -94,8 +101,10 @@ class GeminiLLM:
         temperature: float | None = None,
         max_output_tokens: int | None = None,
         response_schema: dict[str, Any] | None = None,
-    ) -> dict[str, Any] | list[Any]:
-        """Generate structured JSON and return it as parsed Python data."""
+        response_model: type[BaseModel] | Any | None = None,
+    ) -> Any:
+        """Generate structured JSON and optionally validate it against a Pydantic response model."""
+        schema, adapter = self._resolve_response_contract(response_schema, response_model)
         response = self._run_with_retry(
             prompt=prompt,
             model=model,
@@ -103,23 +112,23 @@ class GeminiLLM:
             temperature=temperature,
             max_output_tokens=max_output_tokens,
             response_mime_type="application/json",
-            response_schema=response_schema,
+            response_schema=schema,
         )
 
         parsed = getattr(response, "parsed", None)
         if parsed is not None:
-            if hasattr(parsed, "model_dump"):
-                return parsed.model_dump()
-            return parsed
+            return self._validate_json_payload(parsed, adapter)
 
         text = getattr(response, "text", None)
         if not text or not text.strip():
             raise RuntimeError("Gemini returned an empty JSON response.")
 
         try:
-            return json.loads(text)
+            payload = json.loads(text)
         except json.JSONDecodeError as exc:
             raise RuntimeError("Gemini returned invalid JSON.") from exc
+
+        return self._validate_json_payload(payload, adapter)
 
     def health_check(self, model: str | None = None) -> dict[str, Any]:
         """Verify that credentials, model access, and response generation are working."""
@@ -151,6 +160,7 @@ class GeminiLLM:
     def close(self) -> None:
         """Close the underlying SDK client and release network resources."""
         self._client.close()
+        logger.debug("GeminiLLM client closed.")
 
     def _run_with_retry(
         self,
@@ -182,6 +192,7 @@ class GeminiLLM:
             except errors.APIError as exc:
                 status_code = self._extract_status_code(exc)
                 if not self._should_retry_status_code(status_code):
+                    logger.error("Gemini API error %s: %s", status_code, self._extract_error_message(exc))
                     raise RuntimeError(
                         f"Gemini request failed with API error {status_code}: {self._extract_error_message(exc)}"
                     ) from exc
@@ -189,9 +200,16 @@ class GeminiLLM:
             except TimeoutError as exc:
                 last_error = exc
             except Exception as exc:
+                logger.exception("Unexpected Gemini error during content generation.")
                 raise RuntimeError(f"Unexpected Gemini error: {exc}") from exc
 
             if attempt < self._max_retries:
+                logger.warning(
+                    "Retrying Gemini request after attempt %s/%s due to transient error: %s",
+                    attempt,
+                    self._max_retries,
+                    last_error,
+                )
                 time.sleep(self._retry_delay_seconds * attempt)
 
         raise RuntimeError(f"Gemini request failed after {self._max_retries} attempts: {last_error}") from last_error
@@ -224,6 +242,32 @@ class GeminiLLM:
     def _resolve_model(self, model: str | None) -> str:
         """Resolve the effective model for a request."""
         return model or self._default_model
+
+    @staticmethod
+    def _resolve_response_contract(
+        response_schema: dict[str, Any] | None,
+        response_model: type[BaseModel] | Any | None,
+    ) -> tuple[dict[str, Any] | None, TypeAdapter[Any] | None]:
+        """Resolve the JSON schema and optional adapter for structured-output validation."""
+        if response_schema is not None and response_model is not None:
+            raise ValueError("Provide either response_schema or response_model, not both.")
+
+        if response_model is None:
+            return response_schema, None
+
+        adapter = TypeAdapter(response_model)
+        return adapter.json_schema(), adapter
+
+    @staticmethod
+    def _validate_json_payload(payload: Any, adapter: TypeAdapter[Any] | None) -> Any:
+        """Validate parsed JSON against a response model when one is configured."""
+        if adapter is None:
+            return payload
+
+        try:
+            return adapter.validate_python(payload)
+        except ValidationError as exc:
+            raise RuntimeError(f"Gemini JSON response failed Pydantic validation: {exc}") from exc
 
     @staticmethod
     def _should_retry_status_code(status_code: int | None) -> bool:
