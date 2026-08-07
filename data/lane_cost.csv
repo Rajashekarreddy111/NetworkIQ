@@ -1,0 +1,13 @@
+From_Region,To_Region,Cost_Per_Unit
+North,South,7
+North,East,4
+North,West,6
+South,North,7
+South,East,5
+South,West,8
+East,North,4
+East,South,5
+East,West,5
+West,North,6
+West,South,8
+West,East,5
