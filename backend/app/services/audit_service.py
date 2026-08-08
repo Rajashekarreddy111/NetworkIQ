@@ -5,6 +5,8 @@ from threading import RLock
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.storage.json_store import json_store
+
 
 class AuditEntry(BaseModel):
     id: str
@@ -24,16 +26,16 @@ class AuditResponse(BaseModel):
 
 
 class AuditService:
-    """In-memory repository tracking planner actions and system audit trail entries."""
+    """Repository tracking planner actions and system audit trail entries in audit_logs.json."""
 
     def __init__(self) -> None:
         self._lock = RLock()
-        self._entries: list[AuditEntry] = []
 
     def record(self, action: str, sku: str, location: str, details: str) -> AuditEntry:
-        """Record a new audit entry."""
+        """Record a new audit entry into audit_logs.json."""
         with self._lock:
-            entry_id = f"audit_{len(self._entries) + 1:04d}"
+            existing = json_store.read_all("audit_logs")
+            entry_id = f"audit_{len(existing) + 1:04d}"
             entry = AuditEntry(
                 id=entry_id,
                 action=action,
@@ -41,7 +43,7 @@ class AuditService:
                 location=location,
                 details=details,
             )
-            self._entries.append(entry)
+            json_store.append("audit_logs", entry.model_dump())
             return entry
 
     def log_action(self, action: str, sku: str, user: str, details: str) -> AuditEntry:
@@ -49,9 +51,10 @@ class AuditService:
         return self.record(action=action, sku=sku, location=user, details=details)
 
     def get_audit_trail(self) -> list[AuditEntry]:
-        """Return all recorded audit entries."""
+        """Return all recorded audit entries from audit_logs.json."""
         with self._lock:
-            return list(self._entries)
+            items = json_store.read_all("audit_logs")
+            return [AuditEntry.model_validate(item) for item in items]
 
 
 audit_service = AuditService()

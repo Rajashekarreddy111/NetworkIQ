@@ -1,0 +1,15 @@
+[
+  {
+    "timestamp": "2026-08-08T05:09:25.953852+00:00",
+    "region": "North",
+    "sub_category": "Tomatoes",
+    "sku": "Tomatoes",
+    "action": "add",
+    "quantity": 5,
+    "old_stock": 27,
+    "new_stock": 32,
+    "updated_by": "north_manager@networkiq.com",
+    "user": "north_manager@networkiq.com",
+    "reason": "Test stock addition"
+  }
+]

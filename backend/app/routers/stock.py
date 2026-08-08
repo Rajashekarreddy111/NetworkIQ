@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from app.database.mongodb import db_manager
 from app.models.user import UserResponse
 from app.security.dependencies import require_roles, verify_region_access
 from app.services.audit_service import AuditService
 from app.services.loader import InventoryLoader
+from app.storage.json_store import json_store
 from app.utils.logger import get_logger
 
 
@@ -75,20 +75,20 @@ def update_stock(
 
     now_iso = datetime.now(timezone.utc).isoformat()
     history_entry = {
-        "_id": f"hist_{int(datetime.now(timezone.utc).timestamp() * 1000)}",
+        "timestamp": now_iso,
         "region": payload.region,
+        "sub_category": payload.sku,
         "sku": payload.sku,
         "action": payload.action,
         "quantity": payload.quantity,
         "old_stock": old_stock,
         "new_stock": new_stock,
-        "reason": payload.reason,
+        "updated_by": current_user.email,
         "user": current_user.email,
-        "timestamp": now_iso,
+        "reason": payload.reason,
     }
 
-    history_coll = db_manager.get_collection("stock_history")
-    history_coll.insert_one(history_entry)
+    json_store.append("stock_history", history_entry)
 
     audit_service.log_action(
         action="STOCK_UPDATED",
@@ -127,11 +127,11 @@ def get_stock_history(
     current_user: Annotated[UserResponse, Depends(stock_or_admin)],
     region: Annotated[str | None, Query(description="Filter stock history by region")] = None,
 ) -> list[dict[str, Any]]:
-    """Retrieve stock adjustment history from MongoDB."""
+    """Retrieve stock adjustment history from stock_history.json."""
     if current_user.role == "stock_manager":
         region = current_user.region
 
-    filter_doc = {"region": region} if region else {}
-    history_coll = db_manager.get_collection("stock_history")
-    entries = history_coll.find(filter_doc)
+    entries = json_store.read_all("stock_history")
+    if region:
+        return [e for e in entries if e.get("region") == region]
     return entries

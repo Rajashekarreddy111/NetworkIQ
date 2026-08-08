@@ -5,9 +5,9 @@ from typing import Annotated, Sequence
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.database.mongodb import db_manager
 from app.models.user import UserResponse, UserRole
 from app.security.auth import decode_token
+from app.security.auth_provider import auth_provider
 from app.utils.logger import get_logger
 
 
@@ -44,8 +44,7 @@ def get_current_user(
             detail="Invalid token payload: missing subject.",
         )
 
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"email": email})
+    user_doc = auth_provider.get_user_by_email(email)
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

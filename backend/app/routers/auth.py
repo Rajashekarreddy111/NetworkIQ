@@ -4,14 +4,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Header, status
 
-from app.database.mongodb import db_manager
 from app.models.user import LoginPayload, TokenResponse, UserResponse
 from app.security.auth import (
     create_access_token,
     create_refresh_token,
     decode_token,
-    verify_password,
 )
+from app.security.auth_provider import auth_provider
 from app.security.dependencies import get_current_user
 from app.services.audit_service import AuditService
 from app.utils.logger import get_logger
@@ -30,10 +29,9 @@ audit_service = AuditService()
 )
 def login(payload: LoginPayload) -> TokenResponse:
     """Verify credentials and issue signed JWT access & refresh tokens."""
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"email": payload.email.lower()})
+    user_doc = auth_provider.authenticate_user(payload.email, payload.password)
 
-    if not user_doc or not verify_password(payload.password, user_doc.get("password", "")):
+    if not user_doc:
         logger.warning("Failed login attempt for email: %s", payload.email)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -110,8 +108,7 @@ def refresh_token(x_refresh_token: Annotated[str | None, Header(alias="X-Refresh
             raise ValueError("Token is not a refresh token.")
 
         email = payload.get("sub")
-        users_coll = db_manager.get_collection("users")
-        user_doc = users_coll.find_one({"email": email})
+        user_doc = auth_provider.get_user_by_email(email) if email else None
         if not user_doc or not user_doc.get("isActive", True):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

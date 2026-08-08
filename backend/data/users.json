@@ -1,0 +1,74 @@
+[
+  {
+    "_id": "usr_admin_001",
+    "name": "Ananya Kulkarni",
+    "email": "admin@networkiq.com",
+    "password": "$2b$12$0p92yS9XpJqBHX.2vPIdheeWrpfaFNQ5ugdf0/pbs.WYC.CAn.fFq",
+    "role": "admin",
+    "region": "all",
+    "isActive": true,
+    "createdBy": "system",
+    "createdAt": "2026-08-08T05:02:54.874362+00:00",
+    "updatedAt": "2026-08-08T05:02:54.874362+00:00"
+  },
+  {
+    "_id": "usr_planner_001",
+    "name": "Priya Shah",
+    "email": "planner@networkiq.com",
+    "password": "$2b$12$KkU3wXj0W138u7zOD/je5eJBTG9SwSwvnSXPGyeLnRaVzoeP9.Doq",
+    "role": "planner",
+    "region": "all",
+    "isActive": true,
+    "createdBy": "system",
+    "createdAt": "2026-08-08T05:02:54.874362+00:00",
+    "updatedAt": "2026-08-08T05:02:54.874362+00:00"
+  },
+  {
+    "_id": "usr_stock_north",
+    "name": "Rajesh Kumar",
+    "email": "north_manager@networkiq.com",
+    "password": "$2b$12$f.LCd0RAZJ1RSwIibGX/lOxAd1ntGbty8tS3azhiwLkP/yRNJ3PoO",
+    "role": "stock_manager",
+    "region": "North",
+    "isActive": true,
+    "createdBy": "system",
+    "createdAt": "2026-08-08T05:02:54.874362+00:00",
+    "updatedAt": "2026-08-08T05:02:54.874362+00:00"
+  },
+  {
+    "_id": "usr_stock_south",
+    "name": "Rohan Mehta",
+    "email": "south_manager@networkiq.com",
+    "password": "$2b$12$/c4eP/hijJd7HgjQMqCwVuGAmh4u2F20c7C0GmS0aZV3A.lGEj/qi",
+    "role": "stock_manager",
+    "region": "South",
+    "isActive": true,
+    "createdBy": "system",
+    "createdAt": "2026-08-08T05:02:54.874362+00:00",
+    "updatedAt": "2026-08-08T05:02:54.874362+00:00"
+  },
+  {
+    "_id": "usr_stock_east",
+    "name": "Debasis Roy",
+    "email": "east_manager@networkiq.com",
+    "password": "$2b$12$ENpWlWQ5zQ/cZNMvVckd6.q7J353lcy2xmsO1R8dADYKXiCOO88Ma",
+    "role": "stock_manager",
+    "region": "East",
+    "isActive": true,
+    "createdBy": "system",
+    "createdAt": "2026-08-08T05:02:54.874362+00:00",
+    "updatedAt": "2026-08-08T05:02:54.874362+00:00"
+  },
+  {
+    "_id": "usr_stock_west",
+    "name": "Siddharth Patil",
+    "email": "west_manager@networkiq.com",
+    "password": "$2b$12$yw1ne7I88Kr2gdW9oPpSVuRoH3uBQ6FRboDVmg9W7cRchVB8QJMsa",
+    "role": "stock_manager",
+    "region": "West",
+    "isActive": true,
+    "createdBy": "system",
+    "createdAt": "2026-08-08T05:02:54.874362+00:00",
+    "updatedAt": "2026-08-08T05:02:54.874362+00:00"
+  }
+]

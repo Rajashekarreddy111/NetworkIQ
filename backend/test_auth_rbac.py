@@ -5,14 +5,13 @@ import unittest
 from fastapi.testclient import TestClient
 
 from main import app
-
-
-from app.database.seed import seed_database
+from app.security.auth_provider import auth_provider
+from app.storage.json_store import json_store
 
 
 class AuthAndRBACTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        seed_database()
+        auth_provider.sync_env_users()
         self.client = TestClient(app)
 
     def test_admin_login_success(self) -> None:
@@ -121,6 +120,25 @@ class AuthAndRBACTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(forbidden_update.status_code, 403)
+
+    def test_json_store_idempotency(self) -> None:
+        # Run sync 100 times
+        for _ in range(100):
+            auth_provider.sync_env_users()
+
+        # Verify no duplicate user accounts created in users.json
+        users = json_store.read_all("users")
+        emails = [
+            "admin@networkiq.com",
+            "planner@networkiq.com",
+            "north_manager@networkiq.com",
+            "south_manager@networkiq.com",
+            "east_manager@networkiq.com",
+            "west_manager@networkiq.com",
+        ]
+        for email in emails:
+            matches = [u for u in users if u.get("email") == email]
+            self.assertEqual(len(matches), 1, f"Found multiple documents for email '{email}'.")
 
 
 if __name__ == "__main__":

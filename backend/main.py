@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import settings
-from app.database.seed import seed_database
 from app.routers import ApiError
 from app.routers.admin_users import router as admin_users_router
 from app.routers.analytics import router as analytics_router
@@ -25,6 +24,8 @@ from app.routers.plan import router as plan_router
 from app.routers.plan import selfcheck_router
 from app.routers.regional import router as regional_router
 from app.routers.stock import router as stock_router
+from app.security.auth_provider import auth_provider
+from app.storage.json_store import json_store
 from app.utils.logger import get_logger
 
 
@@ -44,9 +45,12 @@ async def lifespan(app: FastAPI):
     logger.info("Loaded Gemini Model: %s", settings.GEMINI_MODEL)
 
     try:
-        seed_database()
+        # Initialize JSON storage and sync environment users
+        json_store._ensure_storage()
+        auth_provider.sync_env_users()
+        logger.info("JSON file persistence layer initialized cleanly.")
     except Exception as exc:
-        logger.warning("Database seeding error: %s", exc)
+        logger.warning("JSON store initialization error: %s", exc)
 
     logger.info("==================================================")
     yield

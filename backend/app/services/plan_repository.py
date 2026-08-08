@@ -7,10 +7,11 @@ from fastapi import status
 
 from app.models.response import ValidatedTransfer
 from app.routers import ApiError
+from app.storage.json_store import json_store
 
 
 class PlanRepository:
-    """Stores and updates the latest validated plan exposed by the API layer."""
+    """Stores and updates the latest validated plan exposed by the API layer, saving approved plans to approved_plans.json."""
 
     def __init__(self) -> None:
         self._lock = RLock()
@@ -31,6 +32,9 @@ class PlanRepository:
             transfer = self._latest_plan[index]
             approved = transfer.model_copy(update={"status": "approved", "rejection_reason": None})
             self._latest_plan[index] = approved
+
+            # Persist approved recommendation inside approved_plans.json
+            json_store.append("approved_plans", approved.model_dump())
             return approved
 
     def override(self, transfer_id: str, transfer: ValidatedTransfer) -> ValidatedTransfer:

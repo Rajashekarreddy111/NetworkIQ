@@ -5,9 +5,7 @@ pydantic-settings
 python-dotenv
 google-genai
 
-# Database & Security
-pymongo
-motor
+# Security & Validation
 bcrypt
 pyjwt
 email-validator

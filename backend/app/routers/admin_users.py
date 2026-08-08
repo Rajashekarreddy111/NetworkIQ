@@ -5,11 +5,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.database.mongodb import db_manager
 from app.models.user import PasswordReset, UserCreate, UserResponse, UserUpdate
 from app.security.auth import hash_password
+from app.security.auth_provider import auth_provider
 from app.security.dependencies import require_roles
 from app.services.audit_service import AuditService
+from app.storage.json_store import json_store
 from app.utils.logger import get_logger
 
 
@@ -29,9 +30,9 @@ def create_user(
     payload: UserCreate,
     admin: Annotated[UserResponse, Depends(admin_only)],
 ) -> UserResponse:
-    """Create a new user account in MongoDB (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    existing = users_coll.find_one({"email": payload.email.lower()})
+    """Create a new user account in JSON store (Admin only)."""
+    auth_provider.sync_env_users()
+    existing = json_store.find_one("users", {"email": payload.email.lower()})
 
     if existing:
         raise HTTPException(
@@ -55,7 +56,7 @@ def create_user(
         "updatedAt": now_iso,
     }
 
-    users_coll.insert_one(user_doc)
+    json_store.append("users", user_doc)
 
     audit_service.log_action(
         action="USER_CREATED",
@@ -75,9 +76,8 @@ def create_user(
     summary="Admin: List all registered user accounts",
 )
 def list_users(admin: Annotated[UserResponse, Depends(admin_only)]) -> list[UserResponse]:
-    """Retrieve all users stored in MongoDB (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    docs = users_coll.find()
+    """Retrieve all users stored in JSON store (Admin only)."""
+    docs = auth_provider.list_all_users()
     return [UserResponse.model_validate(doc) for doc in docs]
 
 
@@ -92,8 +92,7 @@ def get_user_by_id(
     admin: Annotated[UserResponse, Depends(admin_only)],
 ) -> UserResponse:
     """Get single user document by ID (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"_id": user_id})
+    user_doc = auth_provider.get_user_by_id(user_id)
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -114,8 +113,7 @@ def update_user(
     admin: Annotated[UserResponse, Depends(admin_only)],
 ) -> UserResponse:
     """Update fields of an existing user document (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"_id": user_id})
+    user_doc = auth_provider.get_user_by_id(user_id)
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -125,8 +123,8 @@ def update_user(
     update_fields = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if v is not None}
     update_fields["updatedAt"] = datetime.now(timezone.utc).isoformat()
 
-    users_coll.update_one({"_id": user_id}, {"$set": update_fields})
-    updated_doc = users_coll.find_one({"_id": user_id})
+    json_store.update_one("users", {"_id": user_id}, update_fields)
+    updated_doc = auth_provider.get_user_by_id(user_id)
 
     audit_service.log_action(
         action="USER_UPDATED",
@@ -147,9 +145,8 @@ def delete_user(
     user_id: str,
     admin: Annotated[UserResponse, Depends(admin_only)],
 ) -> dict[str, str]:
-    """Delete a user account from MongoDB (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"_id": user_id})
+    """Delete a user account from JSON store (Admin only)."""
+    user_doc = auth_provider.get_user_by_id(user_id)
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -162,7 +159,7 @@ def delete_user(
             detail="The Admin account cannot be deleted.",
         )
 
-    users_coll.delete_one({"_id": user_id})
+    json_store.delete_one("users", {"_id": user_id})
 
     audit_service.log_action(
         action="USER_DELETED",
@@ -185,19 +182,19 @@ def disable_user(
     admin: Annotated[UserResponse, Depends(admin_only)],
 ) -> UserResponse:
     """Disable user account (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"_id": user_id})
+    user_doc = auth_provider.get_user_by_id(user_id)
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with ID '{user_id}' not found.",
         )
 
-    users_coll.update_one(
+    json_store.update_one(
+        "users",
         {"_id": user_id},
-        {"$set": {"isActive": False, "updatedAt": datetime.now(timezone.utc).isoformat()}},
+        {"isActive": False, "updatedAt": datetime.now(timezone.utc).isoformat()},
     )
-    updated_doc = users_coll.find_one({"_id": user_id})
+    updated_doc = auth_provider.get_user_by_id(user_id)
 
     audit_service.log_action(
         action="USER_DISABLED",
@@ -220,19 +217,19 @@ def enable_user(
     admin: Annotated[UserResponse, Depends(admin_only)],
 ) -> UserResponse:
     """Enable user account (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"_id": user_id})
+    user_doc = auth_provider.get_user_by_id(user_id)
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with ID '{user_id}' not found.",
         )
 
-    users_coll.update_one(
+    json_store.update_one(
+        "users",
         {"_id": user_id},
-        {"$set": {"isActive": True, "updatedAt": datetime.now(timezone.utc).isoformat()}},
+        {"isActive": True, "updatedAt": datetime.now(timezone.utc).isoformat()},
     )
-    updated_doc = users_coll.find_one({"_id": user_id})
+    updated_doc = auth_provider.get_user_by_id(user_id)
 
     audit_service.log_action(
         action="USER_ENABLED",
@@ -255,8 +252,7 @@ def reset_password(
     admin: Annotated[UserResponse, Depends(admin_only)],
 ) -> dict[str, str]:
     """Reset user password with bcrypt hashing (Admin only)."""
-    users_coll = db_manager.get_collection("users")
-    user_doc = users_coll.find_one({"_id": user_id})
+    user_doc = auth_provider.get_user_by_id(user_id)
     if not user_doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -264,9 +260,10 @@ def reset_password(
         )
 
     hashed = hash_password(payload.new_password)
-    users_coll.update_one(
+    json_store.update_one(
+        "users",
         {"_id": user_id},
-        {"$set": {"password": hashed, "updatedAt": datetime.now(timezone.utc).isoformat()}},
+        {"password": hashed, "updatedAt": datetime.now(timezone.utc).isoformat()},
     )
 
     audit_service.log_action(

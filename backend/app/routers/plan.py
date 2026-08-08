@@ -163,6 +163,10 @@ def override_transfer(
     return overridden
 
 
+from datetime import datetime, timezone
+from app.storage.json_store import json_store
+
+
 @router.post(
     "/plan/decision",
     response_model=PlannerDecisionPayload,
@@ -176,6 +180,16 @@ def submit_planner_decision(
 ) -> PlannerDecisionPayload:
     logger.info("Processing planner decision %s for transfer id %s.", payload.decision, payload.id)
     decision_type = payload.decision.lower()
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    decision_record = {
+        "id": payload.id,
+        "decision": payload.decision,
+        "note": payload.note,
+        "quantity": payload.quantity,
+        "timestamp": now_iso,
+    }
+    json_store.append("planner_decisions", decision_record)
 
     if decision_type == "approve":
         transfer = plan_repository.approve(payload.id)
