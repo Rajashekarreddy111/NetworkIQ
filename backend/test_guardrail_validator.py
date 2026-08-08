@@ -15,9 +15,9 @@ class ValidationEngineTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.transfer = TransferWithCost(
             proposal=TransferProposal(
-                sku="SKU1001",
-                from_location="Store_001",
-                to_location="Store_002",
+                sku="Milk",
+                from_location="North",
+                to_location="South",
                 qty=10,
                 transfer_cost=0.0,
                 margin_unlocked=0.0,
@@ -143,7 +143,7 @@ class ValidationEngineTestCase(unittest.TestCase):
         with self.assertRaises(GuardrailValidationError) as context:
             engine.validate_transfer(self.transfer)
 
-        self.assertIn("Failed to load guardrail context for sku SKU1001", str(context.exception))
+        self.assertIn("Failed to load guardrail context for sku Milk", str(context.exception))
 
 
 if __name__ == "__main__":

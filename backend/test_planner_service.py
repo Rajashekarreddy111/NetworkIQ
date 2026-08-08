@@ -10,22 +10,22 @@ from app.services.planner import PlannerService, PlannerServiceError
 
 def build_inventory(location: str) -> InventoryPosition:
     return InventoryPosition(
-        sku="SKU1001",
+        sku="Milk",
         location=location,
         current_stock=100,
         avg_daily_demand=10.0,
         velocity_class="A",
         unit_margin=8.0,
-        perishable=False,
+        perishable=True,
         location_capacity_remaining=200,
     )
 
 
 def build_proposal() -> TransferProposal:
     return TransferProposal(
-        sku="SKU1001",
-        from_location="Store_001",
-        to_location="Store_002",
+        sku="Milk",
+        from_location="North",
+        to_location="South",
         qty=10,
         transfer_cost=35.0,
         margin_unlocked=96.0,
@@ -38,11 +38,11 @@ class FakeInventoryLoader:
     def __init__(self, calls: list[str]) -> None:
         self.calls = calls
 
-    def load(self, file_path: str | Path) -> dict[str, list[InventoryPosition]]:
+    def load(self, file_path: str | Path | None = None) -> dict[str, list[InventoryPosition]]:
         self.calls.append("loader")
         return {
-            "Store_001": [build_inventory("Store_001")],
-            "Store_002": [build_inventory("Store_002")],
+            "North": [build_inventory("North")],
+            "South": [build_inventory("South")],
         }
 
 
@@ -61,7 +61,7 @@ class FakeRegionalAgent:
             SurplusDeficit(
                 sku=inventory_positions[0].sku,
                 location=inventory_positions[0].location,
-                status="surplus" if inventory_positions[0].location == "Store_001" else "deficit",
+                status="surplus" if inventory_positions[0].location == "North" else "deficit",
                 qty=10,
                 confidence=0.93,
                 reasoning="Test regional signal.",
@@ -178,8 +178,8 @@ class PlannerServiceTestCase(unittest.TestCase):
             calls,
             [
                 "loader",
-                "regional:Store_001",
-                "regional:Store_002",
+                "regional:North",
+                "regional:South",
                 "coordinator",
                 "cost_context",
                 "cost_engine",
@@ -212,8 +212,8 @@ class PlannerServiceTestCase(unittest.TestCase):
             calls,
             [
                 "loader",
-                "regional:Store_001",
-                "regional:Store_002",
+                "regional:North",
+                "regional:South",
                 "coordinator",
             ],
         )

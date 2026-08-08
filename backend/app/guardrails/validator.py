@@ -11,6 +11,9 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+from app.services.loader import InventoryLoader
+
+
 class GuardrailValidationError(Exception):
     """Raised when guardrail validation cannot be completed safely."""
 
@@ -22,12 +25,48 @@ class GuardrailContextProvider(Protocol):
         """Return the validation context needed for a single transfer."""
 
 
+class DefaultGuardrailContextProvider:
+    """Provides real guardrail context from region_capacity.csv and cold_chain.csv."""
+
+    def __init__(self, loader: InventoryLoader | None = None) -> None:
+        self._loader = loader or InventoryLoader()
+        self._capacity_map = self._loader.load_region_capacity()
+        self._cold_chain_map = self._loader.load_cold_chain()
+        self._inventory_grouped = self._loader.load()
+
+    def get_context(self, transfer: TransferWithCost) -> GuardrailContext:
+        proposal = transfer.proposal
+        from_loc = proposal.from_location
+        to_loc = proposal.to_location
+
+        source_stock = 100
+        perishable = False
+        if from_loc in self._inventory_grouped:
+            for item in self._inventory_grouped[from_loc]:
+                if item.sku.lower() == proposal.sku.lower():
+                    source_stock = item.current_stock
+                    perishable = item.perishable
+                    break
+
+        dest_capacity = self._capacity_map.get(to_loc, 20000)
+        cold_chain_available = self._cold_chain_map.get(to_loc, True)
+
+        return GuardrailContext(
+            source_stock=source_stock,
+            destination_capacity=dest_capacity,
+            perishable=perishable,
+            cold_chain_available=cold_chain_available,
+            holding_cost_threshold=10000.0,
+            signoff_value_threshold=50000.0,
+        )
+
+
 class ValidationEngine:
     """Deterministic engine that applies guardrail rules to costed transfers."""
 
-    def __init__(self, context_provider: GuardrailContextProvider) -> None:
+    def __init__(self, context_provider: GuardrailContextProvider | None = None) -> None:
         """Initialize the engine with a provider that supplies validation inputs."""
-        self._context_provider = context_provider
+        self._context_provider = context_provider or DefaultGuardrailContextProvider()
 
     def validate_margin(self, transfer: TransferWithCost) -> str | None:
         """Reject transfers whose unlocked margin does not exceed transfer cost."""

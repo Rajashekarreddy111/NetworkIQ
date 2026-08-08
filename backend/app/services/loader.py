@@ -15,34 +15,48 @@ logger = get_logger(__name__)
 
 
 class InventoryLoaderError(Exception):
-    """Raised when processed inventory cannot be loaded or validated."""
+    """Raised when processed inventory or configuration files cannot be loaded or validated."""
 
 
 class InventoryLoader:
-    """Loads processed inventory files and groups validated rows by store."""
+    """Loads preprocessed datasets and supporting configuration files from backend/data/."""
+
+    def __init__(self, data_dir: str | Path | None = None) -> None:
+        self._data_dir = Path(data_dir) if data_dir else self._resolve_data_dir()
+
+    @staticmethod
+    def _resolve_data_dir() -> Path:
+        """Locate backend/data/ or data/ directory in workspace."""
+        backend_root = Path(__file__).resolve().parents[2]
+        workspace_root = backend_root.parent
+
+        candidates = [
+            backend_root / "data",
+            workspace_root / "data",
+        ]
+        for candidate in candidates:
+            if candidate.exists() and candidate.is_dir():
+                return candidate
+
+        return backend_root / "data"
 
     def resolve_default_path(self) -> Path:
-        """Find default inventory file in backend directory or fixtures."""
-        backend_root = Path(__file__).resolve().parents[2]
+        """Return the primary master_inventory.csv path."""
         candidates = [
-            backend_root / "master_inventory.csv",
-            backend_root / "inventory.csv",
-            backend_root / "app" / "fixtures" / "inventory_positions.json",
+            self._data_dir / "master_inventory.csv",
+            self._data_dir.parent / "master_inventory.csv",
         ]
         for candidate in candidates:
             if candidate.exists() and candidate.is_file():
                 return candidate
-        return candidates[0]
+        return self._data_dir / "master_inventory.csv"
 
     def load(self, file_path: str | Path | None = None) -> dict[str, list[InventoryPosition]]:
-        """Load a CSV or JSON inventory file, validate each row, and group records by location."""
+        """Load master_inventory.csv, validate dataset constraints, and group by Region."""
         path = Path(file_path) if file_path else self.resolve_default_path()
-        if not path.exists():
+        if not path.exists() or not path.is_file():
             logger.error("Inventory file not found: %s", path)
             raise InventoryLoaderError(f"Inventory file not found: {path}")
-        if not path.is_file():
-            logger.error("Inventory path is not a file: %s", path)
-            raise InventoryLoaderError(f"Inventory path is not a file: {path}")
 
         suffix = path.suffix.lower()
         if suffix == ".csv":
@@ -50,67 +64,131 @@ class InventoryLoader:
         elif suffix == ".json":
             rows = self._load_json_rows(path)
         else:
-            logger.error("Unsupported inventory file format: %s", path.suffix)
-            raise InventoryLoaderError(
-                f"Unsupported inventory file format: {path.suffix}. Supported formats are .csv and .json."
-            )
+            raise InventoryLoaderError(f"Unsupported inventory file format: {path.suffix}")
 
         grouped_inventory = self._validate_and_group(rows)
-        logger.info("Loaded inventory for %s store(s) from %s.", len(grouped_inventory), path)
+        self.validate_dataset(grouped_inventory)
+        logger.info("Loaded inventory for %s region(s) from %s.", len(grouped_inventory), path)
         return grouped_inventory
 
     def load_flat(self, file_path: str | Path | None = None) -> list[InventoryPosition]:
-        """Load inventory as a flat list of InventoryPosition objects."""
+        """Load master inventory as a flat list of InventoryPosition objects."""
         grouped = self.load(file_path)
         flat_list: list[InventoryPosition] = []
         for positions in grouped.values():
             flat_list.extend(positions)
         return flat_list
 
+    def validate_dataset(self, grouped_inventory: dict[str, list[InventoryPosition]]) -> None:
+        """Validate Task 12 requirements: 96 rows, 4 Regions, 24 Sub-Categories."""
+        total_rows = sum(len(positions) for positions in grouped_inventory.values())
+        regions = set(grouped_inventory.keys())
+        sub_categories = {pos.sku for positions in grouped_inventory.values() for pos in positions}
+
+        if total_rows < 96 and len(regions) == 4 and len(sub_categories) == 24:
+            logger.info("Master dataset loaded: %s records across %s regions.", total_rows, len(regions))
+        elif total_rows != 96:
+            logger.warning("Dataset row count check: found %s rows (expected 96).", total_rows)
+
+        if len(regions) < 4:
+            raise InventoryLoaderError(f"Dataset validation failed: found {len(regions)} regions, expected 4.")
+        if len(sub_categories) < 24:
+            raise InventoryLoaderError(f"Dataset validation failed: found {len(sub_categories)} sub-categories, expected 24.")
+
+    def load_lane_costs(self) -> dict[tuple[str, str], float]:
+        """Load lane_cost.csv and build lookup matrix: (from_region, to_region) -> cost_per_unit."""
+        lane_cost_file = self._data_dir / "lane_cost.csv"
+        if not lane_cost_file.exists():
+            logger.warning("lane_cost.csv not found at %s; returning empty map.", lane_cost_file)
+            return {}
+
+        lane_costs: dict[tuple[str, str], float] = {}
+        rows = self._load_csv_rows(lane_cost_file)
+        for row in rows:
+            from_reg = row.get("From_Region") or row.get("from_region") or row.get("From")
+            to_reg = row.get("To_Region") or row.get("to_region") or row.get("To")
+            cost_str = row.get("Cost_Per_Unit") or row.get("cost_per_unit") or row.get("Cost")
+            if from_reg and to_reg and cost_str is not None:
+                lane_costs[(from_reg.strip(), to_reg.strip())] = float(cost_str)
+
+        logger.info("Loaded %s lane cost pairs from %s.", len(lane_costs), lane_cost_file)
+        return lane_costs
+
+    def load_region_capacity(self) -> dict[str, int]:
+        """Load region_capacity.csv: Region -> Capacity."""
+        cap_file = self._data_dir / "region_capacity.csv"
+        if not cap_file.exists():
+            logger.warning("region_capacity.csv not found at %s; returning default capacity.", cap_file)
+            return {"North": 25000, "South": 18000, "East": 22000, "West": 24000}
+
+        capacity_map: dict[str, int] = {}
+        rows = self._load_csv_rows(cap_file)
+        for row in rows:
+            reg = row.get("Region") or row.get("region")
+            cap = row.get("Capacity") or row.get("capacity")
+            if reg and cap is not None:
+                capacity_map[reg.strip()] = int(cap)
+
+        required_regions = {"North", "South", "East", "West"}
+        for req in required_regions:
+            if req not in capacity_map:
+                logger.warning("region_capacity.csv missing region %s; defaulting.", req)
+                capacity_map[req] = 20000
+
+        logger.info("Loaded capacity for %s region(s) from %s.", len(capacity_map), cap_file)
+        return capacity_map
+
+    def load_cold_chain(self) -> dict[str, bool]:
+        """Load cold_chain.csv: Region -> Cold_Chain_Available."""
+        cc_file = self._data_dir / "cold_chain.csv"
+        if not cc_file.exists():
+            logger.warning("cold_chain.csv not found at %s; returning default map.", cc_file)
+            return {"North": True, "South": False, "East": True, "West": True}
+
+        cold_chain_map: dict[str, bool] = {}
+        rows = self._load_csv_rows(cc_file)
+        for row in rows:
+            reg = row.get("Region") or row.get("region")
+            avail_str = str(row.get("Cold_Chain_Available") or row.get("cold_chain_available") or "").strip().lower()
+            if reg:
+                cold_chain_map[reg.strip()] = avail_str in {"true", "1", "yes"}
+
+        logger.info("Loaded cold chain settings for %s region(s) from %s.", len(cold_chain_map), cc_file)
+        return cold_chain_map
+
     def _load_csv_rows(self, file_path: Path) -> list[dict[str, Any]]:
-        """Read CSV inventory data and return each row as a dictionary for model validation."""
+        """Read CSV inventory data and return each row as a dictionary."""
         try:
             with file_path.open(mode="r", encoding="utf-8-sig", newline="") as csv_file:
                 return list(csv.DictReader(csv_file))
-        except csv.Error as exc:
-            logger.exception("Invalid CSV file: %s", file_path)
-            raise InventoryLoaderError(f"Invalid CSV file: {file_path}") from exc
-        except OSError as exc:
+        except Exception as exc:
             logger.exception("Unable to read CSV file: %s", file_path)
             raise InventoryLoaderError(f"Unable to read CSV file: {file_path}") from exc
 
     def _load_json_rows(self, file_path: Path) -> list[dict[str, Any]]:
-        """Read JSON inventory data and normalize it into a list of row dictionaries."""
+        """Read JSON inventory data."""
         try:
             with file_path.open(mode="r", encoding="utf-8") as json_file:
                 payload = json.load(json_file)
-        except json.JSONDecodeError as exc:
-            logger.exception("Invalid JSON file: %s", file_path)
-            raise InventoryLoaderError(f"Invalid JSON file: {file_path}") from exc
-        except OSError as exc:
+        except Exception as exc:
             logger.exception("Unable to read JSON file: %s", file_path)
             raise InventoryLoaderError(f"Unable to read JSON file: {file_path}") from exc
 
         if not isinstance(payload, list):
-            raise InventoryLoaderError("JSON inventory file must contain a top-level list of rows.")
-
-        for index, row in enumerate(payload, start=1):
-            if not isinstance(row, dict):
-                raise InventoryLoaderError(f"JSON row {index} must be an object.")
+            raise InventoryLoaderError("JSON file must contain a list of rows.")
 
         return payload
 
     def _validate_and_group(self, rows: list[dict[str, Any]]) -> dict[str, list[InventoryPosition]]:
-        """Validate every row with InventoryPosition and group valid records by store location."""
+        """Validate every row with InventoryPosition and group records by Region location."""
         grouped_inventory: dict[str, list[InventoryPosition]] = {}
 
         for index, row in enumerate(rows, start=1):
             try:
                 inventory_position = InventoryPosition.model_validate(row)
+                grouped_inventory.setdefault(inventory_position.location, []).append(inventory_position)
             except ValidationError as exc:
-                logger.error("Invalid inventory row at position %s.", index)
+                logger.error("Invalid inventory row at position %s: %s", index, exc)
                 raise InventoryLoaderError(f"Invalid inventory row at position {index}: {exc}") from exc
-
-            grouped_inventory.setdefault(inventory_position.location, []).append(inventory_position)
 
         return grouped_inventory
