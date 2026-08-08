@@ -1,263 +1,95 @@
-# NetworkIQ Frontend
+# NetworkIQ Frontend Client
 
-NetworkIQ is an AI-powered supply chain inventory optimization console for planners, operations teams, and supply chain analysts. The frontend provides a premium enterprise dashboard for inventory visibility, AI transfer recommendations, planner approvals, agent monitoring, benchmarking, analytics, audit review, and configuration.
+NetworkIQ is an AI-powered enterprise supply chain inventory optimization console for planners, operations teams, and supply chain analysts. The frontend provides a premium dark-first interface for inventory visibility, AI transfer recommendations, planner approvals, agent monitoring, benchmarking, analytics, audit review, and user management.
 
-The app is built as a TanStack Start React application with mocked data by default, and it can be connected to a live NetworkIQ backend through an environment variable.
+The application is built using **React 19**, **Vite 8**, **TanStack Router**, **TanStack Query**, **Axios**, and **Tailwind CSS**. It is fully integrated with the NetworkIQ FastAPI backend.
 
-## Features
+---
 
-- Command dashboard with KPIs, AI insight cards, demand charts, transfer trends, and recent activity.
-- Inventory Network page with SKU filters, inventory health indicators, warehouse context, and route visualization.
-- AI Recommendations page with transfer plans, confidence scores, cost tradeoffs, business impact, and planner actions.
-- Planner Approval Center for approving, rejecting, or overriding recommended transfers.
-- Agent Monitor for the demand, inventory, capacity, transfer, coordinator, and guardrail agents.
-- Benchmark view comparing classical solver output against the NetworkIQ AI plan.
-- Analytics workspace for demand, warehouse, category, SKU, and inventory performance.
-- Audit Trail for recommendation, decision, execution, and completion events.
-- Settings and Profile pages for planner preferences, API settings, notifications, and account context.
-- Responsive shell with desktop sidebar, mobile navigation, global search, notifications, theme controls, and toast feedback.
+## 🚀 Live Backend Integration
 
-## Tech Stack
+The frontend connects directly to the FastAPI backend API via `VITE_NETWORKIQ_API_URL`.
 
-- React 19
-- TypeScript
-- Vite 8
-- TanStack Start
-- TanStack Router
-- TanStack Query
-- TanStack Table
-- Tailwind CSS 4
-- Radix UI primitives
-- shadcn-style UI components
-- Zustand
-- Axios
-- Recharts
-- Motion
-- Lucide React
-- Sonner
-
-## Requirements
-
-- Node.js 20 or newer recommended
-- npm 10 or newer recommended
-
-## Getting Started
-
-Install dependencies from the frontend directory:
-
-```sh
-npm install
-```
-
-Start the development server:
-
-```sh
-npm run dev
-```
-
-The app usually runs at:
-
-```txt
-http://localhost:5173/
-```
-
-If that port is already in use, Vite will print the available local URL in the terminal.
-
-## Available Scripts
-
-```sh
-npm run dev
-```
-
-Starts the Vite development server.
-
-```sh
-npm run build
-```
-
-Creates a production build for the TanStack Start app.
-
-```sh
-npm run build:dev
-```
-
-Creates a development-mode build.
-
-```sh
-npm run preview
-```
-
-Serves the production build locally for verification.
-
-```sh
-npm run lint
-```
-
-Runs ESLint across the frontend source.
-
-```sh
-npm run format
-```
-
-Formats files with Prettier.
-
-## Environment Configuration
-
-The app uses mock data unless `VITE_NETWORKIQ_API_URL` is set.
-
-Create a local `.env` file in the `frontend` directory when connecting to a backend:
+Create a local `.env` file in the `frontend` directory:
 
 ```env
 VITE_NETWORKIQ_API_URL=http://localhost:8000
 ```
 
-When this variable is not set, API hooks read from `src/lib/mock-data.ts` through the mock resource map in `src/lib/api.ts`.
+### Key Features
 
-## Backend API Endpoint Integration
+- **Live Authentication**: Integrated with `POST /auth/login`, `GET /auth/me`, and `POST /auth/logout`. Automatically attaches JWT Bearer tokens to all outbound Axios requests.
+- **Command Dashboard**: Displays live KPIs, demand forecast trends, warehouse utilization, and recent AI transfer recommendations (`GET /dashboard`).
+- **Inventory Explorer**: Sourced from 96 preprocessed regional store inventory records with real-time SKU filtering (`GET /inventory`).
+- **AI Recommendation Engine & Approval Center**: Allows planners to approve, reject, or override transfers (`GET /plan`, `POST /plan/decision`).
+- **Analytics & Benchmark**: Evaluates classical solver vs NetworkIQ AI decision engine performance (`GET /analytics`, `GET /benchmark`).
+- **Audit Log**: Full audit trail of planner decisions and security actions (`GET /audit`).
+- **Settings & Config**: Configures planner approval thresholds and network parameters (`GET /config`).
 
-The frontend connects to the NetworkIQ FastAPI backend (or uses mock fallbacks when `VITE_NETWORKIQ_API_URL` is omitted). Below are all endpoints requested by the frontend app:
+---
 
-### 1. Plan & Approvals
-- **`GET /plan`**
-  - **Purpose**: Returns the latest validated transfer plan recommendations generated by the AI decision engine.
-  - **Response Payload**: `list[ValidatedTransfer]` or `{ "recommendations": [...] }`
-  - **Fields**: `sku`, `from_location`, `to_location`, `qty`, `transfer_cost`, `margin_unlocked`, `demand_basis`, `cost_trade_off`, `status` ("approved" | "rejected" | "needs_signoff"), `cost_per_unit_moved`.
-- **`POST /plan/{id}/approve`**
-  - **Purpose**: Approves a transfer recommendation in the latest validated plan.
-- **`POST /plan/{id}/override`**
-  - **Purpose**: Overrides transfer parameters for a specific recommendation.
-- **`POST /plan/decision`**
-  - **Purpose**: Submits planner decisions (`approved`, `rejected`, `overridden`) with notes and custom quantities.
+## 🛠️ Getting Started
 
-### 2. Self Check & Agent Monitoring
-- **`GET /self-check` / `GET /plan/self-check`**
-  - **Purpose**: Retrieves agent health, activity feeds, and self-check review status.
-- **`POST /selfcheck`**
-  - **Purpose**: Triggers the Self-Check Agent (`SelfCheckAgent`) to evaluate the validated transfer plan.
-  - **Response**: `{ "plan_ok": bool, "flagged_transfers": list[str], "notes": str }`
+Install dependencies and start the development server:
 
-### 3. Benchmarking & Performance
-- **`GET /benchmark`**
-  - **Purpose**: Returns performance comparison between Classical Baseline Solver and NetworkIQ AI Decision Engine.
-  - **Response**: `{ "status": "completed"|"pending", "classical_baseline": {...}, "ai_decision_engine": {...}, "performance_gains": {...} }`
-  - **Metrics**: Total Holding Cost, Total Transfer Cost, Service Level %, Margin Unlocked.
+```bash
+# Install dependencies
+npm install
 
-### 4. Configuration & System Parameters
-- **`GET /config`**
-  - **Purpose**: Fetches system settings, threshold rules, and location configurations.
-  - **Response**: `{ "plannerThreshold": float, "signoff_value_threshold": float, "autoApprove": bool, "budgetEnvelope": float, "supported_locations": list[str], "notifications": {...} }`
+# Start Vite dev server
+npm run dev
+```
 
-### 5. Dashboard & Analytics Workspace
-- **`GET /dashboard`**
-  - **Purpose**: Retrieves high-level KPI cards, demand forecasts, transfer trends, inventory distributions, and active agent activity feed.
-- **`GET /inventory`**
-  - **Purpose**: Retrieves store-level SKU positions, warehouse capacity status, and network routes.
-- **`GET /analytics`**
-  - **Purpose**: Provides demand forecasting, SKU velocity breakdown (A/B/C), top mover splits, and spatial heatmaps.
-- **`GET /audit`**
-  - **Purpose**: Fetches historical audit log entries for all planner actions and system recommendations.
+The application runs locally at: `http://localhost:5173/`
 
-### 6. Pipeline Agent Endpoints (Backend Orchestration)
-- **`POST /agents/regional/{store}`** — Runs store-wise regional inventory analysis via LLM.
-- **`POST /agents/coordinate`** — Performs Python candidate pre-matching & LLM network coordination.
-- **`POST /guardrails/validate`** — Applies deterministic Python guardrail rules (Margin, Capacity, Stock, Cold Chain, Signoff Threshold).
+---
 
-## Project Structure
+## 📦 Available Scripts
+
+```bash
+npm run dev        # Starts Vite dev server
+npm run build      # Creates production build in dist/
+npm run preview    # Serves production build locally
+npm run lint       # Runs ESLint checks
+```
+
+---
+
+## 🌐 Connected FastAPI Endpoints
+
+| Page / Hook | HTTP Method | Endpoint | Description |
+| :--- | :--- | :--- | :--- |
+| **Authentication** | `POST` | `/auth/login` | Log in user & receive JWT token |
+| **User Profile** | `GET` | `/auth/me` | Fetch active user session profile |
+| **Command Dashboard** | `GET` | `/dashboard` | Fetch dashboard metrics & KPIs |
+| **Inventory Network** | `GET` | `/inventory` | Fetch store inventory positions |
+| **AI Recommendations** | `GET` | `/plan` | Fetch validated transfer recommendations |
+| **Planner Action** | `POST` | `/plan/decision` | Submit Approve, Reject, or Override |
+| **Approve Transfer** | `POST` | `/plan/{id}/approve` | Approve specific transfer recommendation |
+| **Override Transfer** | `POST` | `/plan/{id}/override` | Override specific transfer parameters |
+| **Self Check Agent** | `GET` / `POST` | `/self-check` | Evaluate plan safety & guardrail compliance |
+| **Benchmark** | `GET` | `/benchmark` | Classical baseline vs AI engine metrics |
+| **Analytics Workspace**| `GET` | `/analytics` | Demand forecast & velocity distribution |
+| **Audit Trail** | `GET` | `/audit` | Historical audit logs |
+| **Configuration** | `GET` | `/config` | System threshold settings |
+
+---
+
+## 📁 Directory Structure
 
 ```txt
 frontend/
-  public/
-    favicon.ico
-    favicon.svg
-    robots.txt
   src/
     components/
-      common/        Shared dashboard components
-      layout/        App shell, navbar, sidebar
-      ui/            Reusable UI primitives
-    hooks/           Data and viewport hooks
-    lib/             API client, mock data, formatters, utilities
-    routes/          File-based application routes
-    store/           Zustand stores
-    router.tsx       TanStack Router factory
-    routeTree.gen.ts Generated route tree
-    server.ts        SSR server wrapper
-    start.ts         TanStack Start setup
-    styles.css       Global theme and Tailwind styles
+      common/        Shared dashboard widgets (charts, maps, badges)
+      layout/        Navbar, Sidebar, App Shell
+      ui/            Radix UI primitives
+      warehouse/     Warehouse forms and tables
+    hooks/           TanStack Query data hooks (useDashboard, usePlan, etc.)
+    lib/             Axios API client (api.ts), types (types.ts), formatters
+    routes/          File-based routes (inventory, recommendations, approvals, settings)
+    store/           Zustand app and UI stores
+  dist/              Production build artifacts
   package.json
   vite.config.ts
-```
-
-## Routes
-
-- `/` - Command Dashboard
-- `/inventory` - Inventory Network
-- `/recommendations` - AI Recommendations
-- `/approvals` - Planner Approval Center
-- `/agents` - Agent Monitor
-- `/benchmark` - Solver Benchmark
-- `/analytics` - Analytics
-- `/audit` - Audit Trail
-- `/settings` - Settings
-- `/profile` - Profile
-
-## Styling And Design System
-
-The UI uses a dark-first enterprise console style with:
-
-- NetworkIQ brand metadata and favicon assets.
-- Tailwind CSS tokens in `src/styles.css`.
-- Reusable Radix-based UI components in `src/components/ui`.
-- Shared dashboard primitives such as `SummaryCard`, `ChartCard`, `StatusBadge`, filters, states, and map components.
-- Responsive layouts for desktop, tablet, and mobile.
-
-## Data Flow
-
-1. Pages call hooks from `src/hooks/use-networkiq.ts`.
-2. Hooks use TanStack Query for caching, stale times, refetching, and mutations.
-3. `fetchResource` and `postResource` in `src/lib/api.ts` decide between mock mode and live API mode.
-4. Mock mode returns realistic domain data from `src/lib/mock-data.ts`.
-5. Live mode sends requests through the shared Axios client.
-
-## Build Output
-
-Production builds are written to:
-
-```txt
-dist/
-  client/
-  server/
-```
-
-Use `npm run preview` after `npm run build` to inspect the production output locally.
-
-## Development Notes
-
-- `src/routeTree.gen.ts` is generated by TanStack Router. Do not edit it manually.
-- Keep reusable visual primitives in `src/components/common` or `src/components/ui`.
-- Keep page-level workflows in `src/routes`.
-- Keep API request and response handling centralized in `src/lib/api.ts` and `src/hooks/use-networkiq.ts`.
-- Prefer adding typed domain data to `src/lib/mock-data.ts` while backend endpoints are still being finalized.
-
-## Troubleshooting
-
-If dependencies are out of sync:
-
-```sh
-npm install
-```
-
-If a route does not appear after creating a new route file, restart the dev server so the generated route tree refreshes.
-
-If the app still uses mock data after setting a backend URL, confirm the variable name starts with `VITE_`:
-
-```env
-VITE_NETWORKIQ_API_URL=http://localhost:8000
-```
-
-If production behavior differs from development:
-
-```sh
-npm run build
-npm run preview
 ```
