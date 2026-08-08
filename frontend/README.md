@@ -1,77 +1,121 @@
-# NetworkIQ Frontend Client
+# NetworkIQ Frontend Client — Technical Documentation
 
-NetworkIQ is an AI-powered enterprise supply chain inventory optimization console for planners, operations teams, and supply chain analysts. The frontend provides a premium dark-first interface for inventory visibility, AI transfer recommendations, planner approvals, agent monitoring, benchmarking, analytics, audit review, and user management.
+The **NetworkIQ Frontend Client** is an enterprise supply chain inventory optimization and stock rebalancing console built for planners, operations teams, regional stock managers, and supply chain analysts. It provides a premium, dark-first dashboard interface for real-time inventory visibility, AI transfer recommendation reviews, planner approvals, multi-agent execution monitoring, classical vs AI solver benchmarking, analytics, audit reviews, warehouse operations, and user management.
 
-The application is built using **React 19**, **Vite 8**, **TanStack Router**, **TanStack Query**, **Axios**, and **Tailwind CSS**. It is fully integrated with the NetworkIQ FastAPI backend.
+The application is built using **React 19**, **Vite 8**, **TanStack Router**, **TanStack Query**, **Axios**, **Tailwind CSS**, **Recharts**, and **Zustand**, and connects directly to the FastAPI backend API powered by MongoDB.
 
 ---
 
-## 🚀 Live Backend Integration
+## 🛠️ Frontend Tech Stack & Architecture
 
-The frontend connects directly to the FastAPI backend API via `VITE_NETWORKIQ_API_URL`.
+- **UI Framework**: React 19 (Modern component hooks, state primitives)
+- **Build Tool / Bundler**: Vite 8 (Ultra-fast HMR and build optimization)
+- **Routing Engine**: TanStack Router (Type-safe file-based client routing)
+- **Data Fetching & Caching**: TanStack Query v5 (Automatic caching, refetching, mutation management)
+- **HTTP Client**: Axios (Pre-configured API client with JWT Bearer token interceptors)
+- **Styling & Design System**: Tailwind CSS, Lucide Icons, Radix UI Primitives
+- **Data Visualization**: Recharts (Interactive inventory velocity charts, demand curves, warehouse utilization gauges)
+- **State Management**: Zustand (Client UI state & active user session store)
 
-Create a local `.env` file in the `frontend` directory:
+---
+
+## 📡 Live Backend & MongoDB Integration
+
+The frontend client communicates seamlessly with the FastAPI backend (`http://localhost:8000`), which persists and reads all data dynamically from **MongoDB (`networkiq` database)**.
+
+### Environment Setup
+
+Create a `.env` file in the `frontend` root directory:
 
 ```env
 VITE_NETWORKIQ_API_URL=http://localhost:8000
 ```
 
-### Key Features
-
-- **Live Authentication**: Integrated with `POST /auth/login`, `GET /auth/me`, and `POST /auth/logout`. Automatically attaches JWT Bearer tokens to all outbound Axios requests.
-- **Command Dashboard**: Displays live KPIs, demand forecast trends, warehouse utilization, and recent AI transfer recommendations (`GET /dashboard`).
-- **Inventory Explorer**: Sourced from 96 preprocessed regional store inventory records with real-time SKU filtering (`GET /inventory`).
-- **AI Recommendation Engine & Approval Center**: Allows planners to approve, reject, or override transfers (`GET /plan`, `POST /plan/decision`).
-- **Analytics & Benchmark**: Evaluates classical solver vs NetworkIQ AI decision engine performance (`GET /analytics`, `GET /benchmark`).
-- **Audit Log**: Full audit trail of planner decisions and security actions (`GET /audit`).
-- **Settings & Config**: Configures planner approval thresholds and network parameters (`GET /config`).
+### Key Integration Highlights
+- **JWT Session Persistence**: Authenticates via `POST /auth/login`, retrieves user profiles via `GET /auth/me`, and automatically attaches bearer tokens to all outgoing network requests.
+- **Dynamic Configuration Sync**: Reads dynamic thresholds, holding costs, and lead times from MongoDB via `GET /config`.
+- **Live Inventory Synchronization**: Displays real-time stock levels, warehouse capacities, and stock adjustment logs retrieved from MongoDB collections.
 
 ---
 
-## 🛠️ Getting Started
+## 🖥️ Comprehensive View & Page Walkthrough
 
-Install dependencies and start the development server:
+### 1. Command Dashboard (`/`)
+- **Real-Time KPIs**: Total SKUs tracked, total regional inventory value, active transfer recommendations, network stock health ratio.
+- **Warehouse Utilization**: Capacity breakdown across North, South, East, and West distribution centers.
+- **Recent AI Recommendations**: Preview of top stock transfer candidates awaiting approval.
 
-```bash
-# Install dependencies
-npm install
+### 2. Master Inventory Explorer (`/inventory`)
+- **96 Store SKU Grid**: Complete visibility into Indian store inventory positions across 4 regions and 24 product sub-categories.
+- **Stock Status Badges**: Visual indicators for `Healthy`, `Overstocked`, and `Understocked` inventory levels.
+- **Multi-Filter Controls**: Search by SKU name, filter by region (`North`, `South`, `East`, `West`), or filter by product sub-category.
 
-# Start Vite dev server
-npm run dev
-```
+### 3. AI Recommendations & Proposals (`/recommendations`)
+- **Stock Rebalancing Candidates**: Detailed list of transfer recommendations generated by Gemini AI agents.
+- **Financial Metrics**: Freight transfer costs, handling fees, net margin unlock, and payback estimates.
+- **Guardrail Compliance Badges**: Instant visual verification of storage capacity and cold-chain compliance.
 
-The application runs locally at: `http://localhost:5173/`
+### 4. Planner Approval Center (`/approvals`)
+- **Human-in-the-Loop Signoff**: Dedicated approval workspace for supply chain planners.
+- **Decision Actions**:
+  - `Approve`: Confirms transfer recommendation and updates stock status.
+  - `Reject`: Dismisses recommendation with mandatory rejection reason log.
+  - `Override`: Allows planners to adjust transfer quantity or target warehouse.
+
+### 5. Analytics Workspace (`/analytics`)
+- **SKU Velocity Analysis**: ABC inventory classification (Fast-moving Class A, Medium-moving Class B, Slow-moving Class C).
+- **Stockout Risk Gauges**: Identifies high-risk SKUs approaching safety stock thresholds.
+- **Demand Forecasting**: Interactive charts showing demand curves and reorder points.
+
+### 6. Multi-Agent Operations Console (`/agents`)
+- **Agent Triggers**: Execute Regional Agents, Coordinator Agent, or Self-Check Agent on demand.
+- **Live Execution Logs**: Real-time streaming log output from Gemini LLM agent reasoning processes.
+- **Cost Engine Calculator**: Interactive lane cost estimator tool.
+
+### 7. Solver Benchmark Suite (`/benchmark`)
+- **Algorithm Comparison**: Side-by-side performance breakdown comparing Classical Linear Programming solvers against NetworkIQ's Multi-Agent AI Engine.
+- **Efficiency Metrics**: Solution generation speed, cost savings percentage, guardrail adherence rate.
+
+### 8. Regional Warehouse Operations (`/warehouse`)
+- **Stock Adjustment Workspace**: Allows Regional Stock Managers to perform `Add` or `Remove` stock operations in their assigned region.
+- **Regional Isolation**: Restricts Stock Managers strictly to their assigned territory (`North`, `South`, `East`, or `West`).
+- **Stock Adjustment Audit History**: Live log of all stock movements and quantity updates (`/warehouse/history`).
+
+### 9. System Audit Trail (`/audit`)
+- **Compliance Event Log**: Complete history of user logins, password resets, stock adjustments, and planner decision overrides stored in MongoDB.
+
+### 10. System Settings & Configuration (`/settings`)
+- **Parameter Manager**: Admin view to inspect dynamic system parameters, approval thresholds (`APPROVAL_THRESHOLD`), holding cost rates, and guardrail policies.
+
+### 11. Profile & Session Management (`/profile`, `/login`)
+- **Role & Region Badges**: Displays user role (`Admin`, `Planner`, `Stock Manager`) and assigned regional boundaries.
+- **Authentication**: Secure login portal with automatic session restore and logout handling.
 
 ---
 
-## 📦 Available Scripts
+## 🌐 Connected FastAPI API Endpoint Matrix
 
-```bash
-npm run dev        # Starts Vite dev server
-npm run build      # Creates production build in dist/
-npm run preview    # Serves production build locally
-npm run lint       # Runs ESLint checks
-```
-
----
-
-## 🌐 Connected FastAPI Endpoints
-
-| Page / Hook | HTTP Method | Endpoint | Description |
+| Component / Hook | HTTP Method | API Endpoint | Description |
 | :--- | :--- | :--- | :--- |
-| **Authentication** | `POST` | `/auth/login` | Log in user & receive JWT token |
-| **User Profile** | `GET` | `/auth/me` | Fetch active user session profile |
-| **Command Dashboard** | `GET` | `/dashboard` | Fetch dashboard metrics & KPIs |
-| **Inventory Network** | `GET` | `/inventory` | Fetch store inventory positions |
-| **AI Recommendations** | `GET` | `/plan` | Fetch validated transfer recommendations |
-| **Planner Action** | `POST` | `/plan/decision` | Submit Approve, Reject, or Override |
-| **Approve Transfer** | `POST` | `/plan/{id}/approve` | Approve specific transfer recommendation |
-| **Override Transfer** | `POST` | `/plan/{id}/override` | Override specific transfer parameters |
-| **Self Check Agent** | `GET` / `POST` | `/self-check` | Evaluate plan safety & guardrail compliance |
-| **Benchmark** | `GET` | `/benchmark` | Classical baseline vs AI engine metrics |
-| **Analytics Workspace**| `GET` | `/analytics` | Demand forecast & velocity distribution |
-| **Audit Trail** | `GET` | `/audit` | Historical audit logs |
-| **Configuration** | `GET` | `/config` | System threshold settings |
+| `useAuthStore` | `POST` | `/auth/login` | Log in user & store JWT tokens |
+| `useAuthStore` | `GET` | `/auth/me` | Fetch active user profile session |
+| `useAuthStore` | `POST` | `/auth/logout` | Terminate session & log audit event |
+| `useDashboard` | `GET` | `/dashboard` | Fetch dashboard metrics & KPIs |
+| `useInventory` | `GET` | `/inventory` | Fetch 96 regional store stock positions |
+| `usePlan` | `GET` | `/plan` | Fetch validated AI transfer recommendations |
+| `usePlan` | `POST` | `/plan/decision` | Submit planner decision (`approve`, `reject`, `override`) |
+| `usePlan` | `POST` | `/plan/{id}/approve` | Approve specific transfer recommendation |
+| `usePlan` | `POST` | `/plan/{id}/override` | Override transfer parameters |
+| `useAgents` | `POST` | `/agents/regional/{region}` | Run Regional Agent for specified region |
+| `useAgents` | `POST` | `/agents/coordinate` | Run Coordinator Agent rebalancing engine |
+| `useSelfCheck` | `GET` / `POST` | `/self-check` | Run Self-Check Agent plan safety review |
+| `useAnalytics` | `GET` | `/analytics` | Fetch SKU velocity & stockout metrics |
+| `useBenchmark` | `GET` | `/benchmark` | Fetch classical vs AI solver metrics |
+| `useAudit` | `GET` | `/audit` | Fetch system audit event logs |
+| `useConfig` | `GET` | `/config` | Fetch dynamic system thresholds from MongoDB |
+| `useStock` | `POST` | `/stock/update` | Perform stock addition or removal (Region-scoped) |
+| `useStock` | `GET` | `/stock/history` | Retrieve stock adjustment log history |
+| `useAdmin` | `GET` / `POST` | `/admin/users` | Manage user accounts (Admin only) |
 
 ---
 
@@ -79,17 +123,37 @@ npm run lint       # Runs ESLint checks
 
 ```txt
 frontend/
-  src/
-    components/
-      common/        Shared dashboard widgets (charts, maps, badges)
-      layout/        Navbar, Sidebar, App Shell
-      ui/            Radix UI primitives
-      warehouse/     Warehouse forms and tables
-    hooks/           TanStack Query data hooks (useDashboard, usePlan, etc.)
-    lib/             Axios API client (api.ts), types (types.ts), formatters
-    routes/          File-based routes (inventory, recommendations, approvals, settings)
-    store/           Zustand app and UI stores
-  dist/              Production build artifacts
-  package.json
-  vite.config.ts
+  ├── src/
+  │   ├── components/
+  │   │   ├── common/        Shared widgets (stat cards, charts, maps, badges)
+  │   │   ├── layout/        Navbar, Sidebar, App Shell, User menu
+  │   │   ├── ui/            Radix UI primitives & custom UI components
+  │   │   └── warehouse/     Warehouse stock update forms & tables
+  │   ├── hooks/             TanStack Query data hooks (useDashboard, usePlan, useInventory, etc.)
+  │   ├── lib/               Axios API client (api.ts), TypeScript interfaces (types.ts), utility formatters
+  │   ├── routes/            File-based routes (inventory, recommendations, approvals, settings, warehouse, etc.)
+  │   ├── store/             Zustand authentication & UI state stores
+  │   ├── router.tsx         TanStack router initialization
+  │   └── styles.css         Tailwind CSS styles & custom dark theme tokens
+  ├── package.json
+  ├── vite.config.ts
+  └── tsconfig.json
+```
+
+---
+
+## 📦 Available NPM Scripts
+
+```bash
+# Start Vite development server (Port 5173)
+npm run dev
+
+# Build production bundle in dist/
+npm run build
+
+# Serve production build locally for preview
+npm run preview
+
+# Execute ESLint checks
+npm run lint
 ```

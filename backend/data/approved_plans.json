@@ -24,5 +24,31 @@
     "status": "approved",
     "rejection_reason": null,
     "cost_per_unit_moved": 3.5
+  },
+  {
+    "sku": "Milk",
+    "from_location": "North",
+    "to_location": "South",
+    "qty": 10,
+    "transfer_cost": 40.0,
+    "margin_unlocked": 100.0,
+    "demand_basis": "High demand in South",
+    "cost_trade_off": "Unlocked margin > transfer cost",
+    "status": "approved",
+    "rejection_reason": null,
+    "cost_per_unit_moved": 4.0
+  },
+  {
+    "sku": "SKU1001",
+    "from_location": "Store_001",
+    "to_location": "Store_002",
+    "qty": 10,
+    "transfer_cost": 35.0,
+    "margin_unlocked": 96.0,
+    "demand_basis": "Demand exceeds current cover at destination.",
+    "cost_trade_off": "Transfer cost is lower than expected margin unlocked.",
+    "status": "approved",
+    "rejection_reason": null,
+    "cost_per_unit_moved": 3.5
   }
 ]

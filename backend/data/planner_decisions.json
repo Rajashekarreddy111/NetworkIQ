@@ -5,5 +5,12 @@
     "note": "Test approval note",
     "quantity": 10,
     "timestamp": "2026-08-08T05:09:24.245396+00:00"
+  },
+  {
+    "id": "6b2c509b70d5ea7f",
+    "decision": "approve",
+    "note": "Test approval note",
+    "quantity": 10,
+    "timestamp": "2026-08-08T05:42:17.365908+00:00"
   }
 ]

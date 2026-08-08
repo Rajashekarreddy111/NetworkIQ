@@ -86,5 +86,93 @@
     "sku": "SKU1001",
     "location": "Store_001",
     "details": "Transfer approved for qty 10"
+  },
+  {
+    "id": "audit_0012",
+    "timestamp": "2026-08-08T05:42:17.431213+00:00",
+    "action": "APPROVE",
+    "sku": "Milk",
+    "location": "North",
+    "details": "Test approval note"
+  },
+  {
+    "id": "audit_0013",
+    "timestamp": "2026-08-08T05:42:18.174156+00:00",
+    "action": "USER_LOGIN",
+    "sku": "N/A",
+    "location": "admin@networkiq.com",
+    "details": "User Ananya Kulkarni logged in successfully with role 'admin'."
+  },
+  {
+    "id": "audit_0014",
+    "timestamp": "2026-08-08T05:42:18.994806+00:00",
+    "action": "USER_LOGIN",
+    "sku": "N/A",
+    "location": "admin@networkiq.com",
+    "details": "User Ananya Kulkarni logged in successfully with role 'admin'."
+  },
+  {
+    "id": "audit_0015",
+    "timestamp": "2026-08-08T05:42:19.724434+00:00",
+    "action": "USER_CREATED",
+    "sku": "N/A",
+    "location": "admin@networkiq.com",
+    "details": "Admin created user test_north_manager@networkiq.com with role 'stock_manager' and region 'North'."
+  },
+  {
+    "id": "audit_0016",
+    "timestamp": "2026-08-08T05:42:19.860519+00:00",
+    "action": "USER_DISABLED",
+    "sku": "N/A",
+    "location": "admin@networkiq.com",
+    "details": "Admin disabled user account test_north_manager@networkiq.com."
+  },
+  {
+    "id": "audit_0017",
+    "timestamp": "2026-08-08T05:42:19.953254+00:00",
+    "action": "USER_ENABLED",
+    "sku": "N/A",
+    "location": "admin@networkiq.com",
+    "details": "Admin enabled user account test_north_manager@networkiq.com."
+  },
+  {
+    "id": "audit_0018",
+    "timestamp": "2026-08-08T05:42:19.999204+00:00",
+    "action": "USER_DELETED",
+    "sku": "N/A",
+    "location": "admin@networkiq.com",
+    "details": "Admin deleted user account test_north_manager@networkiq.com."
+  },
+  {
+    "id": "audit_0019",
+    "timestamp": "2026-08-08T05:42:21.703029+00:00",
+    "action": "USER_LOGIN",
+    "sku": "N/A",
+    "location": "planner@networkiq.com",
+    "details": "User Priya Shah logged in successfully with role 'planner'."
+  },
+  {
+    "id": "audit_0020",
+    "timestamp": "2026-08-08T05:42:22.526300+00:00",
+    "action": "USER_LOGIN",
+    "sku": "N/A",
+    "location": "north_manager@networkiq.com",
+    "details": "User Rajesh Kumar logged in successfully with role 'stock_manager'."
+  },
+  {
+    "id": "audit_0021",
+    "timestamp": "2026-08-08T05:42:22.671232+00:00",
+    "action": "STOCK_UPDATED",
+    "sku": "Tomatoes",
+    "location": "north_manager@networkiq.com",
+    "details": "User Rajesh Kumar (stock_manager) added 5 units for Tomatoes in region North. Stock changed: 27 -> 32."
+  },
+  {
+    "id": "audit_0022",
+    "timestamp": "2026-08-08T05:42:22.883055+00:00",
+    "action": "APPROVE",
+    "sku": "SKU1001",
+    "location": "Store_001",
+    "details": "Transfer approved for qty 10"
   }
 ]
