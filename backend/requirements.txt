@@ -1,18 +1,22 @@
 fastapi
 uvicorn
 pydantic
+pydantic-settings
 python-dotenv
 google-genai
 
+# Database & Security
+pymongo
+motor
+bcrypt
+pyjwt
+email-validator
+
+# Data Processing
 pandas
 numpy
 
+# HTTP & Serialization
 httpx
-
-anthropic
-
-openai
-
 orjson
-
 python-multipart
