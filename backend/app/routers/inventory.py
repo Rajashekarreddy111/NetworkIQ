@@ -1,4 +1,5 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 
 from app.models.inventory import InventoryPosition
@@ -21,6 +22,7 @@ def get_inventory_loader() -> InventoryLoader:
 def get_inventory(
     region: Annotated[str | None, Query(description="Filter by store region / location")] = None,
     velocity: Annotated[str | None, Query(description="Filter by velocity class (A, B, C)")] = None,
+    sub_category: Annotated[str | None, Query(description="Filter by Sub-Category / SKU name")] = None,
     loader: Annotated[InventoryLoader, Depends(get_inventory_loader)] = None,
 ) -> list[InventoryPosition]:
     """Retrieve validated master inventory positions loaded via InventoryLoader."""
@@ -30,5 +32,7 @@ def get_inventory(
         all_positions = [p for p in all_positions if p.location.lower() == region.lower()]
     if velocity:
         all_positions = [p for p in all_positions if p.velocity_class.lower() == velocity.lower()]
+    if sub_category:
+        all_positions = [p for p in all_positions if p.sku.lower() == sub_category.lower()]
 
     return all_positions
