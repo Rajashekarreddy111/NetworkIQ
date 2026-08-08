@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { toast } from "sonner";
 
-import { inventory as baseInventory, warehouses } from "@/lib/mock-data";
-import type { InventoryRow, TransferStatus, Warehouse } from "@/lib/mock-data";
+import type { InventoryRow, TransferStatus, Warehouse } from "@/lib/types";
 
 export interface PlannerDecision {
   status: TransferStatus;
@@ -108,15 +107,6 @@ export interface HistoryEntry {
   detail: string;
 }
 
-const suppliers = [
-  "Reliance Retail Supply",
-  "Flipkart Wholesale",
-  "Tata Consumer Logistics",
-  "DHL Integrated Fulfilment",
-  "Blue Dart Distribution",
-  "Mahindra Logistics",
-];
-
 const adminUser: CurrentUser = {
   name: "Ananya Kulkarni",
   email: "admin@networkiq.com",
@@ -138,42 +128,21 @@ const warehouseUser: CurrentUser = {
   warehouseId: "WH-MUM",
 };
 
-const warehouseInventorySeed: WarehouseInventoryItem[] = baseInventory.map((item, index) => {
-  const maximumCapacity = Math.max(item.currentStock + 850, Math.round(item.predictedDemand * 2.4));
-  return {
-    ...item,
-    minimumThreshold: Math.max(40, Math.round(item.predictedDemand * 0.35)),
-    maximumCapacity,
-    supplier: suppliers[index % suppliers.length]!,
-    lastUpdated: `2026-08-${String(1 + (index % 7)).padStart(2, "0")} ${String(9 + (index % 8)).padStart(2, "0")}:${String((index * 7) % 60).padStart(2, "0")}`,
-    remarks: item.status === "Healthy" ? "Cycle count matched" : "Needs operations review",
-    expiryDate: item.category.includes("Grocery") ? `2026-${String(10 + (index % 2)).padStart(2, "0")}-${String(12 + (index % 14)).padStart(2, "0")}` : undefined,
-  };
-});
-
-const sampleUploadRows: UploadPreviewRow[] = [
-  { id: "UP-1", sku: "SKU-CE9021", product: "Bluetooth Speaker Max", stock: 420, warehouse: "Mumbai", category: "Consumer Electronics", status: "valid", errors: [] },
-  { id: "UP-2", sku: "SKU-GR6712", product: "Organic Atta 10kg", stock: 980, warehouse: "Mumbai", category: "Grocery & Staples", status: "valid", errors: [] },
-  { id: "UP-3", sku: "", product: "Sports Duffel Bag", stock: 240, warehouse: "Mumbai", category: "Apparel", status: "invalid", errors: ["Empty SKU"] },
-  { id: "UP-4", sku: "SKU-CE9021", product: "Bluetooth Speaker Max", stock: 125, warehouse: "Mumbai", category: "Consumer Electronics", status: "invalid", errors: ["Duplicate SKU"] },
-  { id: "UP-5", sku: "SKU-KT4490", product: "", stock: 88, warehouse: "Mumbai", category: "Kitchenware", status: "invalid", errors: ["Missing Product Name"] },
-  { id: "UP-6", sku: "SKU-HN7722", product: "Multivitamin Pack", stock: -16, warehouse: "Mumbai", category: "Health & Nutrition", status: "invalid", errors: ["Negative Quantity"] },
-  { id: "UP-7", sku: "SKU-FT3201", product: "Walking Shoes Flex", stock: 560, warehouse: "Pune", category: "Footwear", status: "invalid", errors: ["Invalid Warehouse"] },
-  { id: "UP-8", sku: "SKU-XX7788", product: "Travel Mug Steel", stock: 340, warehouse: "Mumbai", category: "Outdoor", status: "invalid", errors: ["Invalid Category"] },
-];
-
-const initialRequests: TransferRequest[] = [
-  { id: "WTR-4108", sku: "SKU-CO1007", product: "LED Smart TV 43\" 4K", warehouseId: "WH-MUM", requestedQty: 340, reason: "Weekend store replenishment", priority: "High", status: "Pending", approvedBy: "-", createdDate: "2026-08-07" },
-  { id: "WTR-4102", sku: "SKU-GR1035", product: "Basmati Rice Premium 10kg", warehouseId: "WH-MUM", requestedQty: 620, reason: "Festival demand uplift", priority: "Critical", status: "Approved", approvedBy: "A. Kulkarni", createdDate: "2026-08-05" },
-  { id: "WTR-4097", sku: "SKU-LA1014", product: "Front Load Washing Machine 7kg", warehouseId: "WH-MUM", requestedQty: 75, reason: "Regional appliance campaign", priority: "Medium", status: "Rejected", approvedBy: "R. Iyer", createdDate: "2026-08-03" },
-];
-
-const initialHistory: HistoryEntry[] = [
-  { id: "H-1", date: "2026-08-07 18:20", action: "Excel Imported", user: "Rohan Mehta", detail: "48 valid rows imported into Bhiwandi Mega Distribution Center" },
-  { id: "H-2", date: "2026-08-07 15:42", action: "Transfer Requested", user: "Rohan Mehta", detail: "Requested 340 units for SKU-CO1007" },
-  { id: "H-3", date: "2026-08-06 11:08", action: "Stock Updated", user: "Priya Shah", detail: "Cycle count corrected 12 consumer electronics SKUs" },
-  { id: "H-4", date: "2026-08-05 09:31", action: "Inventory Added", user: "Rohan Mehta", detail: "Added 980 units of grocery inventory" },
-];
+const defaultWarehouse: Warehouse = {
+  id: "WH-MUM",
+  name: "Bhiwandi Mega Distribution Center",
+  code: "MUM-02",
+  city: "Mumbai",
+  region: "West",
+  lat: 19.29,
+  lng: 73.06,
+  capacity: 620000,
+  utilization: 84,
+  skus: 15320,
+  inventoryValue: 241800000,
+  stores: 268,
+  onTime: 94.1,
+};
 
 interface AuthState {
   user: CurrentUser | null;
@@ -224,31 +193,23 @@ interface WarehouseState {
   rejectTransfer: (id: string) => void;
 }
 
-function warehouseStatus(stock: number, min: number, max: number): WarehouseInventoryItem["status"] {
-  if (stock <= Math.round(min * 0.45)) return "Stockout Risk";
-  if (stock < min) return "Understock";
-  if (stock > max * 0.9) return "Overstock";
-  return "Healthy";
-}
-
 export const useWarehouseStore = create<WarehouseState>((set, get) => ({
-  warehouse: warehouses.find((w) => w.id === "WH-MUM") ?? warehouses[0]!,
-  inventory: warehouseInventorySeed,
-  uploadRows: sampleUploadRows,
+  warehouse: defaultWarehouse,
+  inventory: [],
+  uploadRows: [],
   uploadStatus: "Ready",
-  transferRequests: initialRequests,
-  history: initialHistory,
+  transferRequests: [],
+  history: [],
   addInventory: (item) =>
     set((s) => {
-      const status = warehouseStatus(item.currentStock, item.minimumThreshold, item.maximumCapacity);
       const next: WarehouseInventoryItem = {
         ...item,
         id: `INV-${String(s.inventory.length + 1001).padStart(4, "0")}`,
-        risk: status === "Stockout Risk" ? "critical" : status === "Understock" ? "high" : status === "Overstock" ? "medium" : "low",
-        status,
-        daysCover: Math.round((item.currentStock / Math.max(item.minimumThreshold, 1)) * 10),
-        capacityUsed: Math.round((item.currentStock / Math.max(item.maximumCapacity, 1)) * 100),
-        predictedDemand: Math.round(item.minimumThreshold * 2.3),
+        risk: "low",
+        status: "Healthy",
+        daysCover: 30,
+        capacityUsed: 50,
+        predictedDemand: 100,
         history: [],
       };
       toast.success("Inventory Successfully Updated");

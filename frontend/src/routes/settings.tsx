@@ -9,7 +9,6 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { useConfig } from "@/hooks/use-networkiq";
 import { inr } from "@/lib/format";
-import { warehouses } from "@/lib/mock-data";
 import { useUiStore } from "@/store/ui-store";
 import { useState } from "react";
 

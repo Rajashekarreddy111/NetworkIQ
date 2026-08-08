@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/common/states";
 import { InventoryTable } from "@/components/warehouse/InventoryTable";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { categories } from "@/lib/mock-data";
+import { categories } from "@/lib/types";
 import { getInventoryStatus } from "@/services/inventory";
 import { useWarehouseStore } from "@/store/app-store";
 

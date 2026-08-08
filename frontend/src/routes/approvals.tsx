@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { usePlan } from "@/hooks/use-networkiq";
 import { inr, num } from "@/lib/format";
-import type { Recommendation } from "@/lib/mock-data";
+import type { Recommendation } from "@/lib/types";
 import { usePlannerStore } from "@/store/app-store";
 
 export const Route = createFileRoute("/approvals")({

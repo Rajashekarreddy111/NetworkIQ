@@ -7,30 +7,30 @@ import type {
   InventoryRow,
   Recommendation,
   Warehouse,
-} from "@/lib/mock-data";
-import type {
-  agentFeed,
-  benchmark,
-  dashboardMetrics,
-  demandForecast,
-  heatmap,
-  inventoryDistribution,
-  moverSplit,
-  topSkus,
-  transferRoutes,
-  transferTrend,
-} from "@/lib/mock-data";
-
-type Feed = typeof agentFeed;
+} from "@/lib/types";
 
 export interface DashboardPayload {
-  metrics: typeof dashboardMetrics;
-  demandForecast: typeof demandForecast;
-  transferTrend: typeof transferTrend;
-  inventoryDistribution: typeof inventoryDistribution;
-  moverSplit: typeof moverSplit;
+  metrics: {
+    totalWarehouses: number;
+    totalStores: number;
+    activeSkus: number;
+    inventoryValue: number;
+    holdingCost: number;
+    transferCost: number;
+    estimatedSavings: number;
+    aiConfidence: number;
+    pendingTransfers: number;
+    rejectedTransfers: number;
+    warehouseUtilization: number;
+    stockoutRisk: number;
+  };
+  demandForecast: any[];
+  transferTrend: any[];
+  inventoryDistribution: any[];
+  moverSplit: any[];
   warehouses: Warehouse[];
-  activities: Feed;
+  activities: any[];
+  recentTransfers: Recommendation[];
 }
 
 export const dashboardQuery = () =>
@@ -47,7 +47,7 @@ export const inventoryQuery = () =>
       fetchResource<{
         rows: InventoryRow[];
         warehouses: Warehouse[];
-        routes: typeof transferRoutes;
+        routes: any[];
       }>("/inventory"),
     staleTime: 60_000,
   });
@@ -62,14 +62,14 @@ export const planQuery = () =>
 export const selfCheckQuery = () =>
   queryOptions({
     queryKey: ["self-check"],
-    queryFn: () => fetchResource<{ agents: AgentState[]; feed: Feed }>("/self-check"),
+    queryFn: () => fetchResource<{ agents: AgentState[]; feed: any[]; result?: any }>("/self-check"),
     refetchInterval: 15_000,
   });
 
 export const benchmarkQuery = () =>
   queryOptions({
     queryKey: ["benchmark"],
-    queryFn: () => fetchResource<typeof benchmark>("/benchmark"),
+    queryFn: () => fetchResource<any>("/benchmark"),
     staleTime: 300_000,
   });
 
@@ -78,12 +78,13 @@ export const analyticsQuery = () =>
     queryKey: ["analytics"],
     queryFn: () =>
       fetchResource<{
-        demandForecast: typeof demandForecast;
-        transferTrend: typeof transferTrend;
+        demandForecast: any[];
+        transferTrend: any[];
         warehouses: Warehouse[];
-        topSkus: typeof topSkus;
-        heatmap: typeof heatmap;
-        inventoryDistribution: typeof inventoryDistribution;
+        topSkus: any[];
+        heatmap: any[];
+        inventoryDistribution: any[];
+        velocityDistribution: any;
       }>("/analytics"),
     staleTime: 120_000,
   });
@@ -102,6 +103,7 @@ export interface ConfigPayload {
   autoApprove: boolean;
   budgetEnvelope: number;
   notifications: { email: boolean; slack: boolean; digest: boolean; criticalOnly: boolean };
+  supportedRegions?: string[];
 }
 
 export const configQuery = () =>

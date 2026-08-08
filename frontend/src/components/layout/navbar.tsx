@@ -25,7 +25,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { notifications } from "@/lib/mock-data";
+import { notifications } from "@/lib/types";
 import { useAuthStore } from "@/store/app-store";
 import { useUiStore } from "@/store/ui-store";
 

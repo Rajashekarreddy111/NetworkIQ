@@ -23,7 +23,7 @@ import { ErrorState, EmptyState, LoadingSkeleton, PageHeader } from "@/component
 import { StatusBadge } from "@/components/common/status-badge";
 import { Button } from "@/components/ui/button";
 import { useInventory } from "@/hooks/use-networkiq";
-import { categories, regions, type InventoryRow } from "@/lib/mock-data";
+import { categories, regions, type InventoryRow } from "@/lib/types";
 import { inr, num } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useInventoryFilters } from "@/store/app-store";

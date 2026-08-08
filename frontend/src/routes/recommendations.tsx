@@ -13,7 +13,7 @@ import { SummaryCard } from "@/components/common/summary-card";
 import { Button } from "@/components/ui/button";
 import { usePlan } from "@/hooks/use-networkiq";
 import { inr, num } from "@/lib/format";
-import type { Recommendation } from "@/lib/mock-data";
+import type { Recommendation } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { usePlannerStore } from "@/store/app-store";
 

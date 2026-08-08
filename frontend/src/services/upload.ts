@@ -1,4 +1,4 @@
-import { categories, warehouses } from "@/lib/mock-data";
+import { categories } from "@/lib/types";
 import type { UploadPreviewRow } from "@/store/app-store";
 
 export function validateUploadRows(rows: UploadPreviewRow[]) {
@@ -10,8 +10,7 @@ export function validateUploadRows(rows: UploadPreviewRow[]) {
     if (row.sku) seen.add(row.sku);
     if (!row.product.trim()) errors.push("Missing Product Name");
     if (row.stock < 0) errors.push("Negative Quantity");
-    if (!warehouses.some((warehouse) => warehouse.city === row.warehouse)) errors.push("Invalid Warehouse");
-    if (!categories.includes(row.category)) errors.push("Invalid Category");
+    if (!categories.includes(row.category as any)) errors.push("Invalid Category");
     return { ...row, errors, status: errors.length ? "invalid" : "valid" } satisfies UploadPreviewRow;
   });
 }

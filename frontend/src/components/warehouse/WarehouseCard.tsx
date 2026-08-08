@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/common/status-badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { compact, inr, num } from "@/lib/format";
-import type { Warehouse } from "@/lib/mock-data";
+import type { Warehouse } from "@/lib/types";
 
 interface WarehouseCardProps extends Warehouse {
   inventoryCount: number;

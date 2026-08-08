@@ -9,8 +9,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { categories, warehouses } from "@/lib/mock-data";
+import { categories } from "@/lib/types";
 import { useWarehouseStore } from "@/store/app-store";
+
+const warehouses = [
+  { id: "WH-NORTH", city: "North Regional Hub" },
+  { id: "WH-SOUTH", city: "South Regional Hub" },
+  { id: "WH-EAST", city: "East Regional Hub" },
+  { id: "WH-WEST", city: "West Regional Hub" },
+];
 
 const schema = z.object({
   sku: z.string().min(3, "SKU is required"),

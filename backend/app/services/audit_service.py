@@ -44,6 +44,10 @@ class AuditService:
             self._entries.append(entry)
             return entry
 
+    def log_action(self, action: str, sku: str, user: str, details: str) -> AuditEntry:
+        """Alias method for recording audit logs with user parameter."""
+        return self.record(action=action, sku=sku, location=user, details=details)
+
     def get_audit_trail(self) -> list[AuditEntry]:
         """Return all recorded audit entries."""
         with self._lock:

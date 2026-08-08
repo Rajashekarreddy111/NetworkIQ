@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { StatusBadge } from "@/components/common/status-badge";
 import { inr } from "@/lib/format";
-import type { Warehouse } from "@/lib/mock-data";
+import type { Warehouse } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const OUTLINE: [number, number][] = [
